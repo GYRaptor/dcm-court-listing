@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import authRoutes from "./routes/auth.routes.js";
 
 // Load environment variables from .env
 dotenv.config();
@@ -18,6 +19,9 @@ app.use(
 
 // Parse incoming JSON request bodies into req.body
 app.use(express.json());
+
+// Mount API routes
+app.use("/auth", authRoutes);
 
 // Health check endpoint for verifying server uptime and deployment status
 app.get("/health", (req, res) => {
@@ -42,9 +46,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start listening if running directly
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Start listening if running directly (and not imported for testing)
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
