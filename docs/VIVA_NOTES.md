@@ -33,7 +33,8 @@
 1. **ES Modules (`"type": "module"`)**: Used standard modern JavaScript `import`/`export` across the entire codebase instead of legacy CommonJS `require()`, maintaining clarity and consistency with React frontend code.
 2. **String UUIDs vs Serial Integers for Primary Keys**: Primary keys use `String @id @default(uuid())` rather than auto-incrementing integers. This prevents enumeration attacks (where an attacker guesses `/cases/1`, `/cases/2`), improves security, and avoids sequence synchronization errors in distributed/cloud databases like Neon.
 3. **Database Index on `[status, priorityScore]`**: Daily cause-list generation frequently queries pending cases sorted by priority (`WHERE status = 'PENDING' ORDER BY priorityScore DESC`). A composite index on `(status, priorityScore)` makes this lookup $O(\log N)$ instead of requiring a full table scan ($O(N)$), preventing database bottlenecks as case volume grows.
-4. **Idempotent Seeding with `upsert`**: `prisma/seed.js` uses `prisma.<model>.upsert()` matching on unique keys (`email`, `name`, `userId`). This guarantees that running `npm run prisma:seed` multiple times will update records safely without throwing unique constraint violations.
+4. **Connection Pooling with Neon (`-pooler`)**: Neon operates on serverless PostgreSQL compute instances. Using Neon's connection pooler endpoint with transaction/session pooling prevents exhausting PostgreSQL maximum client connection limits when Express serves concurrent requests.
+5. **Idempotent Seeding with `upsert`**: `prisma/seed.js` uses `prisma.<model>.upsert()` matching on unique keys (`email`, `name`, `userId`). This guarantees that running `npm run prisma:seed` multiple times will update records safely without throwing unique constraint violations.
 
 ---
 
