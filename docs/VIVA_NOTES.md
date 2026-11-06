@@ -53,3 +53,4 @@
 
 #### Q5: What is the purpose of `earliestNextDate` in the Case model?
 **Answer**: `earliestNextDate` enforces statutory or procedural cooling-off periods (gap days) between hearings. When a case is adjourned or heard, its next hearing cannot be scheduled before `hearingDate + track.gapDays`. This ensures court registries do not prematurely relist matters before parties have completed legal discovery or notice service.
+

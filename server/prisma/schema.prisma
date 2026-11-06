@@ -153,3 +153,4 @@ model Hearing {
 
   @@map("hearings")
 }
+
