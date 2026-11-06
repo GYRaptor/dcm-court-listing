@@ -1,0 +1,155 @@
+// Prisma schema file for Differentiated Case Flow Management (DCM) System
+// Datasource connects to PostgreSQL (Neon in production) via DATABASE_URL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
+
+enum Role {
+  CLERK
+  JUDGE
+  LAWYER
+}
+
+enum CaseStatus {
+  PENDING
+  LISTED
+  DISPOSED
+}
+
+enum HearingOutcome {
+  SCHEDULED
+  HEARD
+  ADJOURNED
+  DISPOSED
+}
+
+enum PartyRole {
+  PETITIONER
+  RESPONDENT
+  ADVOCATE
+}
+
+enum CaseType {
+  BAIL
+  CHEQUE_BOUNCE
+  RENT_DISPUTE
+  CIVIL_SUIT
+  COMMERCIAL_DISPUTE
+  PROPERTY_DISPUTE
+}
+
+// -------------------------------------------------------------
+// MODELS
+// -------------------------------------------------------------
+
+// System user account with authentication details
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  // Optional 1-to-1 relation with Judge profile (if role == JUDGE)
+  judge        Judge?
+
+  @@map("users")
+}
+
+// Judge profile containing courtroom assignments and daily listing capacity
+model Judge {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courtroom     String
+  dailyCapacity Int       @default(10)
+
+  // Cases assigned to this judge and hearings presided over
+  cases         Case[]
+  hearings      Hearing[]
+
+  @@map("judges")
+}
+
+// DCM Track defining turnaround speed and adjournment gap rules
+// Tracks: FAST (90 days / 7 gap), STANDARD (365 days / 21 gap), COMPLEX (730 days / 45 gap)
+model Track {
+  id         String   @id @default(uuid())
+  name       String   @unique // FAST | STANDARD | COMPLEX
+  targetDays Int      // Maximum allowed days for case disposal
+  gapDays    Int      // Minimum mandatory gap between consecutive hearings
+  cases      Case[]
+
+  @@map("tracks")
+}
+
+// Court Case entity tracking lifecycle, complexity, priority, and assigned judge
+model Case {
+  id                 String     @id @default(uuid())
+  caseNumber         String     @unique // e.g., DCM/2026/0001
+  title              String
+  caseType           CaseType
+  filingDate         DateTime   @default(now())
+  hasExpertEvidence  Boolean    @default(false)
+  isUrgent           Boolean    @default(false)
+  complexity         Int        // Computed complexity score
+  trackId            String
+  track              Track      @relation(fields: [trackId], references: [id])
+  status             CaseStatus @default(PENDING)
+  priorityScore      Float      @default(0) // Higher score = listed earlier in cause list
+  targetDisposalDate DateTime   // filingDate + track.targetDays
+  earliestNextDate   DateTime   // Earliest date this case is eligible to be listed
+  adjournmentCount   Int        @default(0)
+  disposedDate       DateTime?
+  judgeId            String?
+  judge              Judge?     @relation(fields: [judgeId], references: [id])
+
+  parties            Party[]
+  hearings           Hearing[]
+
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Composite index for fast cause-list listing queries
+  @@index([status, priorityScore])
+  @@map("cases")
+}
+
+// Legal party or representative attached to a case
+model Party {
+  id     String    @id @default(uuid())
+  caseId String
+  case   Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  name   String
+  role   PartyRole
+
+  @@map("parties")
+}
+
+// Individual scheduled court session or hearing outcome record
+model Hearing {
+  id          String         @id @default(uuid())
+  caseId      String
+  case        Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  judgeId     String
+  judge       Judge          @relation(fields: [judgeId], references: [id])
+  hearingDate DateTime
+  outcome     HearingOutcome @default(SCHEDULED)
+  remarks     String?
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("hearings")
+}
