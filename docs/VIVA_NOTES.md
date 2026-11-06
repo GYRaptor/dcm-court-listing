@@ -59,3 +59,77 @@
 
 #### Q5: What is the purpose of `earliestNextDate` in the Case model?
 **Answer**: `earliestNextDate` enforces statutory cooling-off periods (gap days) between hearings. When a case is adjourned or heard, its next hearing cannot be scheduled before `hearingDate + track.gapDays`. This ensures court registries do not prematurely relist matters before parties have completed legal discovery or notice service.
+
+
+---
+
+## 📅 Day 2: Authentication, Authorization & Role-Based Access Control (RBAC)
+
+### 1. What Was Built
+- **Zod Validation Schemas (`server/src/schemas/auth.schema.js`)**: Strict validation rules for advocate registration (name min 2, valid email, password min 8) and user login.
+- **RBAC Middleware (`server/src/middleware/auth.middleware.js`)**:
+  - `requireAuth`: Validates `Authorization: Bearer <token>`, verifies signature via `jwt.verify`, and attaches authenticated user entity (`req.user`) without `passwordHash`.
+  - `requireRole(...allowedRoles)`: Higher-order guard returning `403 Forbidden` if `req.user.role` does not match authorized roles.
+- **Authentication Endpoints (`server/src/routes/auth.routes.js`)**:
+  - `POST /auth/register`: Public self-registration strictly hardcoded to the `LAWYER` role (ignoring any requested role).
+  - `POST /auth/login`: Issues 7-day signed JWT on matching credentials with uniform error messaging.
+  - `GET /auth/me`: Returns current user profile with courtroom attributes for judges.
+  - Demo RBAC test endpoints: `GET /auth/clerk-only` and `GET /auth/judge-only`.
+- **Client Fetch Wrapper (`client/src/api.js`)**: Single clean fetch abstraction that injects Bearer JWT from `localStorage` and throws standard errors.
+- **Session Management (`client/src/context/AuthContext.jsx`)**: Global React state maintaining user session, rehydrating on page refresh via `GET /auth/me`.
+- **Protected Routing (`client/src/components/ProtectedRoute.jsx`)**: React Router route guard redirecting unauthenticated traffic to `/login` and displaying an "Access Not Allowed" screen for role violations.
+- **Role-Aware UI (`client/src/components/Navbar.jsx`)**: Dynamic navigation rendering role-specific menus (Clerk, Judge, Lawyer), user profile tags, and logout action.
+- **Auth Pages (`client/src/pages/Login.jsx`, `Register.jsx`)**: Tailwind-styled login with viva demo quick-fill accounts and advocate enrollment forms.
+- **Automated Test Suite (`server/tests/auth.test.js`)**: 12 comprehensive automated assertions proving all Day 2 security criteria.
+
+---
+
+### 2. How It Works & Core Concepts
+
+#### A. How Bcrypt Hashing Works
+- Passwords are never stored in plaintext. `bcrypt.hash(password, 10)` generates a random 128-bit salt and combines it with an adaptive key derivation function (10 rounds = $2^{10} = 1024$ iterations).
+- The output string contains the algorithm version, cost factor, salt, and hash. When validating, `bcrypt.compare(password, hash)` extracts the salt from the stored hash, hashes the candidate password using that same salt, and performs a **constant-time byte comparison** to prevent timing attacks.
+
+#### B. What a JWT Contains & Why It Is Signed
+- A JSON Web Token consists of three base64url-encoded parts separated by dots:
+  1. **Header**: Token type (`JWT`) and hashing algorithm (`HS256`).
+  2. **Payload**: Non-sensitive claims identifying the user (`{ id: user.id, role: user.role, iat, exp }`).
+  3. **Signature**: `HMACSHA256(base64Url(header) + "." + base64Url(payload), secret)`.
+- **Why it is signed**: The signature guarantees **integrity**. If a malicious client modifies their role in the payload from `LAWYER` to `JUDGE`, the server's signature check will fail because the attacker does not possess the server's private `JWT_SECRET`.
+
+#### C. How `requireAuth` & `requireRole` Work
+- `requireAuth` inspects the HTTP `Authorization` header. If missing or invalid, it returns `401 Unauthorized`. It verifies the JWT signature, looks up the active user record in Neon, and attaches it to `req.user`.
+- `requireRole(...roles)` executes immediately after `requireAuth`. It checks if `roles.includes(req.user.role)`. If true, execution proceeds to the controller via `next()`; if false, it immediately halts the request with `403 Forbidden`.
+
+#### D. Why Registration Is LAWYER-Only
+- In a court system, Court Clerks and Judicial Officers are appointed through official administrative procedures; allowing public self-registration for judicial roles would represent a catastrophic security failure. Self-registration is strictly for practicing advocates (`LAWYER`), while `CLERK` and `JUDGE` accounts are provisioned exclusively through administrative seeds.
+
+#### E. Why Login Returns the Same Error for Both Failures
+- `POST /auth/login` returns `{ error: "Invalid email or password" }` with status `401` regardless of whether the email does not exist or the password was incorrect. If the server returned "User not found", an attacker could brute-force email lists to enumerate valid court staff and judge accounts.
+
+---
+
+### 3. Key Decisions & Rationale
+1. **Stateless JWTs vs State-Backed Sessions**: JWTs eliminate the need to query a Redis or database session store on every HTTP request. The token itself securely carries the user's ID and role verified by HMAC signature.
+2. **Server-Enforced Role Assignment**: The registration controller explicitly destructures only `{ name, email, password }` and forces `role: "LAWYER"`. Any client payload containing `{ role: "JUDGE" }` is ignored, defeating privilege escalation attempts.
+3. **Session Rehydration with `/auth/me`**: Rather than trusting obsolete user data cached in `localStorage`, the client queries `GET /auth/me` upon page refresh. If an account has been disabled or their courtroom assignment changed, it immediately reflects on the frontend.
+4. **Defense in Depth with `select` Exclusion**: All Prisma queries in auth routes explicitly `select` safe fields or exclude `passwordHash`, guaranteeing that database password hashes are never leaked over the wire.
+
+---
+
+### 4. Likely Viva Questions & Answers
+
+#### Q1: What is the difference between Authentication and Authorization in your DCFM system?
+**Answer**: Authentication is verifying **identity** ("Who are you?"), handled by `POST /auth/login` verifying email and password and issuing a signed JWT. Authorization is verifying **permissions** ("What are you allowed to do?"), handled by the `requireRole` middleware and `ProtectedRoute` component ensuring a Lawyer cannot generate cause lists or a Clerk cannot record judicial hearing outcomes.
+
+#### Q2: Why did you use JWTs instead of traditional cookie-based sessions stored in a database?
+**Answer**: JWTs are stateless and horizontally scalable. Because the user's ID and role are cryptographically signed inside the token, the backend does not need to maintain a shared session table or Redis cache. This fits serverless deployments (such as Render and Neon) where requests may hit distributed container instances.
+
+#### Q3: How does `bcrypt.compare` prevent timing attacks?
+**Answer**: In a naive string comparison (`a === b`), the comparison terminates at the first differing character, allowing an attacker to deduce characters based on microscopic differences in server response time. `bcrypt.compare` uses a constant-time comparison algorithm that always inspects all bytes regardless of where differences occur, eliminating timing side channels.
+
+#### Q4: If the JWT payload is readable by anyone (base64 encoded), what prevents a user from tampering with their role?
+**Answer**: While the payload can be decoded by anyone, it is cryptographically signed using `HMAC-SHA256` with our secret key (`JWT_SECRET`). If an attacker alters the payload (e.g., changing `"role": "LAWYER"` to `"role": "JUDGE"`), the signature no longer matches the payload. When `jwt.verify()` runs on the server, it detects the mismatch and throws a `JsonWebTokenError`, rejecting the request with 401.
+
+#### Q5: Why is `passwordHash` stripped before returning user objects to the client?
+**Answer**: Principle of Least Privilege and Information Exposure prevention. Even though bcrypt hashes are salted and one-way, exposing them in HTTP responses allows offline dictionary attacks or rainbow table probing if traffic is intercepted or client logs are exposed.
