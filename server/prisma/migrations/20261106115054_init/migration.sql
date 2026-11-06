@@ -55,7 +55,11 @@ CREATE TABLE "cases" (
     "hasExpertEvidence" BOOLEAN NOT NULL DEFAULT false,
     "isUrgent" BOOLEAN NOT NULL DEFAULT false,
     "complexity" INTEGER NOT NULL,
+    "suggestedTrackId" TEXT NOT NULL,
     "trackId" TEXT NOT NULL,
+    "trackApproved" BOOLEAN NOT NULL DEFAULT false,
+    "trackApprovedById" TEXT,
+    "trackOverrideReason" TEXT,
     "status" "CaseStatus" NOT NULL DEFAULT 'PENDING',
     "priorityScore" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "targetDisposalDate" TIMESTAMP(3) NOT NULL,
@@ -93,6 +97,18 @@ CREATE TABLE "hearings" (
     CONSTRAINT "hearings_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "audit_logs" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "action" TEXT NOT NULL,
+    "caseId" TEXT,
+    "details" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "audit_logs_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -112,7 +128,13 @@ CREATE INDEX "cases_status_priorityScore_idx" ON "cases"("status", "priorityScor
 ALTER TABLE "judges" ADD CONSTRAINT "judges_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "cases" ADD CONSTRAINT "cases_suggestedTrackId_fkey" FOREIGN KEY ("suggestedTrackId") REFERENCES "tracks"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "cases" ADD CONSTRAINT "cases_trackId_fkey" FOREIGN KEY ("trackId") REFERENCES "tracks"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cases" ADD CONSTRAINT "cases_trackApprovedById_fkey" FOREIGN KEY ("trackApprovedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "cases" ADD CONSTRAINT "cases_judgeId_fkey" FOREIGN KEY ("judgeId") REFERENCES "judges"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -125,3 +147,9 @@ ALTER TABLE "hearings" ADD CONSTRAINT "hearings_caseId_fkey" FOREIGN KEY ("caseI
 
 -- AddForeignKey
 ALTER TABLE "hearings" ADD CONSTRAINT "hearings_judgeId_fkey" FOREIGN KEY ("judgeId") REFERENCES "judges"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "cases"("id") ON DELETE SET NULL ON UPDATE CASCADE;
