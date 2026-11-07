@@ -10,6 +10,7 @@ import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Cases from "./pages/Cases.jsx";
 import NewCase from "./pages/NewCase.jsx";
+import CaseDetail from "./pages/CaseDetail.jsx";
 import CauseList from "./pages/CauseList.jsx";
 import MyHearings from "./pages/MyHearings.jsx";
 import AuditLog from "./pages/AuditLog.jsx";
@@ -49,6 +50,22 @@ export default function App() {
                 }
               />
               <Route
+                path="/cases"
+                element={
+                  <ProtectedRoute allowedRoles={["CLERK", "JUDGE"]}>
+                    <Cases />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cases/:id"
+                element={
+                  <ProtectedRoute allowedRoles={["CLERK", "JUDGE"]}>
+                    <CaseDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/cause-list"
                 element={
                   <ProtectedRoute allowedRoles={["CLERK", "JUDGE"]}>
@@ -58,14 +75,6 @@ export default function App() {
               />
 
               {/* Protected Routes: Clerk Only */}
-              <Route
-                path="/cases"
-                element={
-                  <ProtectedRoute allowedRoles={["CLERK"]}>
-                    <Cases />
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="/cases/new"
                 element={

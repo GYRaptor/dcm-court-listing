@@ -69,6 +69,9 @@ export default function Navbar() {
                   <NavLink to="/dashboard" className={navLinkClass}>
                     Dashboard
                   </NavLink>
+                  <NavLink to="/cases" end className={navLinkClass}>
+                    Cases
+                  </NavLink>
                   <NavLink to="/hearings" className={navLinkClass}>
                     My Hearings
                   </NavLink>
