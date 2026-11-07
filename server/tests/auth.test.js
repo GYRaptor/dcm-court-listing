@@ -197,6 +197,21 @@ async function runTests() {
     console.error("Test execution encountered an error:", err);
     process.exit(1);
   } finally {
+    // Clean up test-created records so shared database is not polluted
+    try {
+      const { default: prisma } = await import("../src/utils/prisma.js");
+      await prisma.user.deleteMany({
+        where: {
+          OR: [
+            { email: { startsWith: "advocate.test." } },
+            { email: { startsWith: "spoof.judge." } },
+          ],
+        },
+      });
+      await prisma.$disconnect();
+    } catch (cleanupErr) {
+      console.warn("Test cleanup warning:", cleanupErr.message);
+    }
     server.close();
   }
 }
