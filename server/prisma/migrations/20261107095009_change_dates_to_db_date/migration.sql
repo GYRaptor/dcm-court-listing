@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "cases" ALTER COLUMN "filingDate" SET DATA TYPE DATE,
+ALTER COLUMN "targetDisposalDate" SET DATA TYPE DATE,
+ALTER COLUMN "earliestNextDate" SET DATA TYPE DATE,
+ALTER COLUMN "disposedDate" SET DATA TYPE DATE;
+
+-- AlterTable
+ALTER TABLE "hearings" ALTER COLUMN "hearingDate" SET DATA TYPE DATE;

@@ -107,7 +107,7 @@ model Case {
   caseNumber          String     @unique // e.g., DCM/2026/0001
   title               String
   caseType            CaseType
-  filingDate          DateTime   @default(now())
+  filingDate          DateTime   @default(now()) @db.Date
   hasExpertEvidence   Boolean    @default(false)
   isUrgent            Boolean    @default(false)
   complexity          Int        // Computed complexity score
@@ -124,10 +124,10 @@ model Case {
 
   status              CaseStatus @default(PENDING)
   priorityScore       Float      @default(0) // Higher score = listed earlier in cause list
-  targetDisposalDate  DateTime   // filingDate + track.targetDays
-  earliestNextDate    DateTime   // Earliest date this case is eligible to be listed
+  targetDisposalDate  DateTime   @db.Date // filingDate + track.targetDays
+  earliestNextDate    DateTime   @db.Date // Earliest date this case is eligible to be listed
   adjournmentCount    Int        @default(0)
-  disposedDate        DateTime?
+  disposedDate        DateTime?  @db.Date
   judgeId             String?
   judge               Judge?     @relation(fields: [judgeId], references: [id])
 
@@ -161,7 +161,7 @@ model Hearing {
   case        Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
   judgeId     String
   judge       Judge          @relation(fields: [judgeId], references: [id])
-  hearingDate DateTime
+  hearingDate DateTime       @db.Date
   outcome     HearingOutcome @default(SCHEDULED)
   remarks     String?
 

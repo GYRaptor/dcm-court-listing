@@ -26,4 +26,7 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Private Viva Notes
+docs/VIVA_NOTES.md
+
 docs/VIVA_NOTES.md
