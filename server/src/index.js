@@ -3,6 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import caseRoutes from "./routes/case.routes.js";
+import judgeRoutes from "./routes/judge.routes.js";
+import causeListRoutes from "./routes/causelist.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
+import hearingRoutes from "./routes/hearing.routes.js";
 
 // Load environment variables from .env
 dotenv.config();
@@ -24,6 +28,10 @@ app.use(express.json());
 // Mount API routes
 app.use("/auth", authRoutes);
 app.use("/cases", caseRoutes);
+app.use("/judges", judgeRoutes);
+app.use("/cause-list", causeListRoutes);
+app.use("/dashboard", dashboardRoutes);
+app.use("/hearings", hearingRoutes);
 
 // Health check endpoint for verifying server uptime and deployment status
 app.get("/health", (req, res) => {

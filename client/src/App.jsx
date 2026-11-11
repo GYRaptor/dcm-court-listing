@@ -102,15 +102,8 @@ export default function App() {
                 }
               />
 
-              {/* Protected Route: Lawyer & All Logged-in Roles */}
-              <Route
-                path="/lookup"
-                element={
-                  <ProtectedRoute>
-                    <Lookup />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Public Route: Case Docket Lookup (Lawyer, Litigant, Public) */}
+              <Route path="/lookup" element={<Lookup />} />
 
               {/* 404 Fallback */}
               <Route

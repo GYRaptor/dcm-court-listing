@@ -154,11 +154,28 @@ export default function CaseDetail() {
                   🚨 Urgent Matter
                 </span>
               )}
+              {caseData.isOverdue && (
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                  🚨 Overdue Target
+                </span>
+              )}
+              {caseData.isAging && (
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                  ⏳ Aging (&gt;5y)
+                </span>
+              )}
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                ⚡ Priority: {Number(caseData.priorityScore || 0).toFixed(1)}
+              </span>
             </div>
             <h1 className="text-lg font-bold text-slate-900 mt-1">{caseData.title}</h1>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">
-              Case Type: {caseData.caseType}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 font-mono mt-0.5">
+              <span>Case Type: {caseData.caseType}</span>
+              <span>•</span>
+              <span className="text-slate-600 font-medium">
+                {caseData.judge ? `${caseData.judge.courtroom} (${caseData.judge.user?.name})` : "Unassigned Bench"}
+              </span>
+            </div>
           </div>
           <div className="text-left md:text-right text-xs text-slate-500 space-y-1">
             <div>Filing Date: <strong className="text-slate-700 font-mono">{caseData.filingDate}</strong></div>
@@ -348,7 +365,7 @@ export default function CaseDetail() {
         </div>
       </div>
 
-      {/* Hearing History Placeholder */}
+      {/* Hearing History — richer timeline with outcome, remarks, next date */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
           Hearing Schedule & Proceedings
@@ -358,13 +375,42 @@ export default function CaseDetail() {
             No court hearings scheduled yet. Matter will appear upon daily cause list generation.
           </p>
         ) : (
-          <div className="space-y-2">
-            {caseData.hearings.map((h) => (
-              <div key={h.id} className="p-3 bg-slate-50 rounded-lg text-xs flex justify-between">
-                <span>{h.hearingDate}</span>
-                <span className="font-bold">{h.outcome}</span>
-              </div>
-            ))}
+          <div className="divide-y divide-slate-100">
+            {caseData.hearings.map((h) => {
+              const outcomeBadge =
+                h.outcome === "HEARD"     ? "bg-emerald-100 text-emerald-800" :
+                h.outcome === "ADJOURNED" ? "bg-amber-100 text-amber-800" :
+                h.outcome === "DISPOSED"  ? "bg-slate-200 text-slate-700" :
+                                            "bg-blue-100 text-blue-800";
+              return (
+                <div key={h.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono font-semibold text-slate-700">{h.hearingDate}</span>
+                    <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[11px] ${outcomeBadge}`}>
+                      {h.outcome}
+                    </span>
+                    {h.remarks && (
+                      <span className="italic text-slate-400 max-w-xs truncate" title={h.remarks}>
+                        "{h.remarks}"
+                      </span>
+                    )}
+                  </div>
+                  {h.judge && (
+                    <span className="text-[11px] text-slate-400 shrink-0">
+                      Presided: {h.judge?.user?.name || "—"}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {/* Next eligible listing date */}
+        {caseData.status === "PENDING" && caseData.earliestNextDate && (
+          <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800">
+            <span className="font-bold">Earliest Next Listing: </span>
+            <span className="font-mono">{caseData.earliestNextDate}</span>
+            <span className="text-blue-600 ml-2">(statutory cooling gap enforced)</span>
           </div>
         )}
       </div>

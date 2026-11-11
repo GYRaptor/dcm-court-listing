@@ -5,24 +5,40 @@ import { createCaseSchema, trackActionSchema } from "../schemas/case.schema.js";
 import { calculateComplexity } from "../services/complexity.service.js";
 import { suggestTrack } from "../services/track.service.js";
 import { generateCaseNumber } from "../services/caseNumber.service.js";
+import { assignJudgeGreedy } from "../services/judge.service.js";
+import {
+  calculatePriorityScore,
+  isCaseOverdue,
+  isCaseAging,
+} from "../services/priority.service.js";
 import { todayIST, toDateOnly, addDays, formatDateString } from "../utils/dates.js";
 
 const router = express.Router();
 
-// Helper to format case date attributes to YYYY-MM-DD strings for clean JSON responses
 function formatCaseDates(c) {
   if (!c) return null;
+  const filingStr = formatDateString(c.filingDate);
+  const targetStr = formatDateString(c.targetDisposalDate);
+  const earliestStr = formatDateString(c.earliestNextDate);
+  const disposedStr = formatDateString(c.disposedDate);
+
   return {
     ...c,
-    filingDate: formatDateString(c.filingDate),
-    targetDisposalDate: formatDateString(c.targetDisposalDate),
-    earliestNextDate: formatDateString(c.earliestNextDate),
-    disposedDate: formatDateString(c.disposedDate),
+    filingDate: filingStr,
+    targetDisposalDate: targetStr,
+    earliestNextDate: earliestStr,
+    disposedDate: disposedStr,
+    isOverdue: isCaseOverdue(targetStr, c.status),
+    isAging: isCaseAging(filingStr, c.status),
+    hearings: c.hearings?.map((h) => ({
+      ...h,
+      hearingDate: formatDateString(h.hearingDate),
+    })),
   };
 }
 
 // POST /cases
-// CLERK only: registers a new case, creates parties, suggests track, and logs audit entry
+// CLERK only: registers a new case, auto-assigns judge by workload, computes priority, logs audit entry
 router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
   try {
     const parseResult = createCaseSchema.safeParse(req.body);
@@ -35,11 +51,6 @@ router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
     const data = parseResult.data;
     const filingDateStr = data.filingDate || todayIST();
 
-    // Execute in a single atomic transaction:
-    // 1. Calculate complexity & determine track from DB
-    // 2. Generate sequential case number
-    // 3. Insert Case + Parties
-    // 4. Create AuditLog entry
     const newCase = await prisma.$transaction(async (tx) => {
       const complexity = calculateComplexity(
         data.caseType,
@@ -52,6 +63,17 @@ router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
       const caseNumber = await generateCaseNumber(tx, filingYear);
       const targetDisposalDateStr = addDays(filingDateStr, track.targetDays);
       const earliestNextDateStr = todayIST();
+
+      // greedy load-balancing assignment across active judges
+      const assignedJudgeId = await assignJudgeGreedy(tx);
+
+      const priorityScore = calculatePriorityScore({
+        filingDate: filingDateStr,
+        targetDays: track.targetDays,
+        isUrgent: data.isUrgent,
+        adjournmentCount: 0,
+        asOfDate: todayIST(),
+      });
 
       const created = await tx.case.create({
         data: {
@@ -66,7 +88,8 @@ router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
           trackId: track.id,
           trackApproved: false,
           status: "PENDING",
-          priorityScore: 0,
+          priorityScore,
+          judgeId: assignedJudgeId,
           targetDisposalDate: toDateOnly(targetDisposalDateStr),
           earliestNextDate: toDateOnly(earliestNextDateStr),
           parties: {
@@ -79,11 +102,15 @@ router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
         include: {
           track: true,
           suggestedTrack: true,
+          judge: {
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+            },
+          },
           parties: true,
         },
       });
 
-      // Write immutable audit trail entry
       await tx.auditLog.create({
         data: {
           userId: req.user.id,
@@ -93,7 +120,8 @@ router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
             caseNumber: created.caseNumber,
             complexity,
             suggestedTrack: track.name,
-            targetDays: track.targetDays,
+            priorityScore,
+            assignedJudgeId,
           }),
         },
       });
@@ -110,11 +138,86 @@ router.post("/", requireAuth, requireRole("CLERK"), async (req, res, next) => {
   }
 });
 
+// GET /cases/tracks
+// Returns configured DCFM tracks for dropdowns and filters
+router.get("/tracks", requireAuth, async (req, res, next) => {
+  try {
+    const tracks = await prisma.track.findMany({
+      orderBy: { targetDays: "asc" },
+    });
+    return res.status(200).json({ tracks });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /cases/lookup/*
+// Public & Advocate read-only search by case number (e.g. DCM/2026/0001)
+// Wildcard pattern handles forward slashes in case identifiers seamlessly
+router.get("/lookup/:caseNumber(*)", async (req, res, next) => {
+  try {
+    const rawParam = req.params.caseNumber || req.params[0] || "";
+    const rawNumber = decodeURIComponent(rawParam).trim().toUpperCase();
+
+    const caseRecord = await prisma.case.findFirst({
+      where: {
+        caseNumber: { equals: rawNumber, mode: "insensitive" },
+      },
+      include: {
+        track: {
+          select: { name: true, targetDays: true, gapDays: true },
+        },
+        parties: {
+          select: { name: true, role: true },
+        },
+        hearings: {
+          orderBy: { hearingDate: "asc" },
+          select: { hearingDate: true, outcome: true },
+        },
+      },
+    });
+
+    if (!caseRecord) {
+      return res.status(404).json({
+        error: `No court matter found with case number '${rawNumber}'`,
+      });
+    }
+
+    const filingStr = formatDateString(caseRecord.filingDate);
+    const targetStr = formatDateString(caseRecord.targetDisposalDate);
+    const earliestStr = formatDateString(caseRecord.earliestNextDate);
+
+    // sanitized public docket without sensitive internal judicial remarks
+    const publicDocket = {
+      caseNumber: caseRecord.caseNumber,
+      title: caseRecord.title,
+      caseType: caseRecord.caseType,
+      status: caseRecord.status,
+      filingDate: filingStr,
+      targetDisposalDate: targetStr,
+      earliestNextDate: earliestStr,
+      track: caseRecord.track,
+      trackApproved: caseRecord.trackApproved,
+      isOverdue: isCaseOverdue(targetStr, caseRecord.status),
+      isAging: isCaseAging(filingStr, caseRecord.status),
+      parties: caseRecord.parties,
+      hearings: caseRecord.hearings.map((h) => ({
+        hearingDate: formatDateString(h.hearingDate),
+        outcome: h.outcome,
+      })),
+    };
+
+    return res.status(200).json({ case: publicDocket });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /cases
-// CLERK and JUDGE: retrieves filtered case list sorted newest first
+// CLERK and JUDGE: filtered case list sorted by priorityScore descending
 router.get("/", requireAuth, requireRole("CLERK", "JUDGE"), async (req, res, next) => {
   try {
-    const { track, status, approved } = req.query;
+    const { track, status, approved, judgeId } = req.query;
 
     const where = {};
 
@@ -126,16 +229,20 @@ router.get("/", requireAuth, requireRole("CLERK", "JUDGE"), async (req, res, nex
       where.trackApproved = approved === "true";
     }
 
+    if (judgeId) {
+      where.judgeId = judgeId;
+    }
+
     if (track) {
-      // Allow filtering by track name (FAST, STANDARD, COMPLEX) or direct trackId
       where.track = {
         OR: [{ name: track.toUpperCase() }, { id: track }],
       };
     }
 
+    // prioritize urgent and aging matters at the top of the cause list
     const cases = await prisma.case.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { priorityScore: "desc" },
       include: {
         track: true,
         suggestedTrack: true,
@@ -151,19 +258,6 @@ router.get("/", requireAuth, requireRole("CLERK", "JUDGE"), async (req, res, nex
     return res.status(200).json({
       cases: cases.map(formatCaseDates),
     });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// GET /cases/tracks
-// Returns configured DCFM tracks for filter and override dropdowns
-router.get("/tracks", requireAuth, async (req, res, next) => {
-  try {
-    const tracks = await prisma.track.findMany({
-      orderBy: { targetDays: "asc" },
-    });
-    return res.status(200).json({ tracks });
   } catch (err) {
     next(err);
   }
@@ -191,6 +285,11 @@ router.get("/:id", requireAuth, requireRole("CLERK", "JUDGE"), async (req, res, 
         parties: true,
         hearings: {
           orderBy: { hearingDate: "asc" },
+          include: {
+            judge: {
+              include: { user: { select: { id: true, name: true } } },
+            },
+          },
         },
         auditLogs: {
           orderBy: { createdAt: "desc" },
@@ -292,9 +391,17 @@ router.patch("/:id/track", requireAuth, requireRole("JUDGE"), async (req, res, n
         });
       }
 
-      // Recalculate targetDisposalDate using filingDate and new track's targetDays
       const filingDateStr = formatDateString(caseRecord.filingDate);
       const newTargetDisposalDateStr = addDays(filingDateStr, newTrack.targetDays);
+
+      // recompute priority score matching the new track's timeline
+      const updatedPriorityScore = calculatePriorityScore({
+        filingDate: filingDateStr,
+        targetDays: newTrack.targetDays,
+        isUrgent: caseRecord.isUrgent,
+        adjournmentCount: caseRecord.adjournmentCount,
+        asOfDate: todayIST(),
+      });
 
       const overridden = await tx.case.update({
         where: { id },
@@ -304,6 +411,7 @@ router.patch("/:id/track", requireAuth, requireRole("JUDGE"), async (req, res, n
           trackApprovedById: req.user.id,
           trackOverrideReason: reason,
           targetDisposalDate: toDateOnly(newTargetDisposalDateStr),
+          priorityScore: updatedPriorityScore,
         },
         include: {
           track: true,

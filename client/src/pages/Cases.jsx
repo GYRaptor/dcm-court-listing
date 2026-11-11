@@ -7,13 +7,14 @@ export default function Cases() {
   const { user } = useAuth();
 
   const [cases, setCases] = useState([]);
+  const [judges, setJudges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Filters
   const [trackFilter, setTrackFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [approvedFilter, setApprovedFilter] = useState("");
+  const [judgeFilter, setJudgeFilter] = useState("");
 
   const fetchCases = async () => {
     setLoading(true);
@@ -23,6 +24,7 @@ export default function Cases() {
       if (trackFilter) queryParams.append("track", trackFilter);
       if (statusFilter) queryParams.append("status", statusFilter);
       if (approvedFilter) queryParams.append("approved", approvedFilter);
+      if (judgeFilter) queryParams.append("judgeId", judgeFilter);
 
       const qs = queryParams.toString();
       const endpoint = qs ? `/cases?${qs}` : "/cases";
@@ -35,11 +37,24 @@ export default function Cases() {
     }
   };
 
+  const fetchJudges = async () => {
+    if (user?.role !== "CLERK") return;
+    try {
+      const res = await api.get("/judges");
+      setJudges(res.judges || []);
+    } catch (err) {
+      console.warn("Failed to load judges filter list", err);
+    }
+  };
+
   useEffect(() => {
     fetchCases();
-  }, [trackFilter, statusFilter, approvedFilter]);
+  }, [trackFilter, statusFilter, approvedFilter, judgeFilter]);
 
-  // Track Badge styling helper
+  useEffect(() => {
+    fetchJudges();
+  }, [user?.role]);
+
   const getTrackBadge = (trackName) => {
     switch (trackName) {
       case "FAST":
@@ -60,7 +75,7 @@ export default function Cases() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Case Registry</h1>
           <p className="text-sm text-slate-500">
-            Master repository of court filings, assigned DCFM tracks, and judicial review statuses.
+            Master repository of filings sorted by cause-list listing priority score.
           </p>
         </div>
         {user?.role === "CLERK" && (
@@ -122,12 +137,33 @@ export default function Cases() {
           </select>
         </div>
 
-        {(trackFilter || statusFilter || approvedFilter) && (
+        {user?.role === "CLERK" && judges.length > 0 && (
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              Filter by Assigned Bench
+            </label>
+            <select
+              value={judgeFilter}
+              onChange={(e) => setJudgeFilter(e.target.value)}
+              className="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="">All Courtrooms</option>
+              {judges.map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.courtroom} — {j.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {(trackFilter || statusFilter || approvedFilter || judgeFilter) && (
           <button
             onClick={() => {
               setTrackFilter("");
               setStatusFilter("");
               setApprovedFilter("");
+              setJudgeFilter("");
             }}
             className="text-xs text-blue-600 hover:text-blue-800 font-semibold self-end pb-2"
           >
@@ -167,11 +203,12 @@ export default function Cases() {
               <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
                 <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider">
                   <tr>
+                    <th className="px-4 py-3">Priority</th>
                     <th className="px-4 py-3">Case Number</th>
                     <th className="px-4 py-3">Cause Title & Type</th>
                     <th className="px-4 py-3">Track</th>
-                    <th className="px-4 py-3">Judicial Review</th>
-                    <th className="px-4 py-3">Filing Date</th>
+                    <th className="px-4 py-3">Review</th>
+                    <th className="px-4 py-3">Assigned Bench</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3 text-right">Action</th>
                   </tr>
@@ -179,17 +216,38 @@ export default function Cases() {
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {cases.map((c) => (
                     <tr key={c.id} className="hover:bg-slate-50 transition">
+                      {/* Priority Score Pill */}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                          ⚡ {Number(c.priorityScore).toFixed(1)}
+                        </span>
+                      </td>
+
                       <td className="px-4 py-3 font-mono font-bold text-blue-700 whitespace-nowrap">
                         <Link to={`/cases/${c.id}`} className="hover:underline">
                           {c.caseNumber}
                         </Link>
                       </td>
+
                       <td className="px-4 py-3 max-w-xs">
                         <div className="font-semibold text-slate-900 truncate" title={c.title}>
                           {c.title}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-mono">{c.caseType}</div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10px] text-slate-400 font-mono">{c.caseType}</span>
+                          {c.isOverdue && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 border border-rose-300">
+                              🚨 Overdue
+                            </span>
+                          )}
+                          {c.isAging && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                              ⏳ Aging (&gt;5y)
+                            </span>
+                          )}
+                        </div>
                       </td>
+
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={`px-2 py-0.5 rounded text-[11px] font-bold border ${getTrackBadge(
@@ -199,6 +257,7 @@ export default function Cases() {
                           {c.track?.name} ({c.track?.targetDays}d)
                         </span>
                       </td>
+
                       <td className="px-4 py-3 whitespace-nowrap">
                         {c.trackApproved ? (
                           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
@@ -210,9 +269,18 @@ export default function Cases() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap font-mono text-slate-500">
-                        {c.filingDate}
+
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-600 font-medium">
+                        {c.judge ? (
+                          <div>
+                            <span className="font-semibold text-slate-800">{c.judge.courtroom}</span>
+                            <div className="text-[10px] text-slate-400">{c.judge.user?.name}</div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 italic">Unassigned</span>
+                        )}
                       </td>
+
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -226,6 +294,7 @@ export default function Cases() {
                           {c.status}
                         </span>
                       </td>
+
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <Link
                           to={`/cases/${c.id}`}

@@ -1,18 +1,281 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import api from "../api.js";
 
 export default function MyHearings() {
+  const { user } = useAuth();
+  const [hearings, setHearings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [date, setDate] = useState("");
+
+  // Per-hearing outcome UI state
+  const [remarkInputs, setRemarkInputs] = useState({});
+  const [submitting, setSubmitting] = useState({});
+  const [successMessages, setSuccessMessages] = useState({});
+  const [errorMessages, setErrorMessages] = useState({});
+  const [nextDates, setNextDates] = useState({});
+
+  const fetchHearings = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.get("/hearings/mine");
+      setHearings(res.hearings || []);
+      setDate(res.date || "");
+    } catch (err) {
+      setError(err.message || "Failed to load today's hearings.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHearings();
+  }, []);
+
+  const recordOutcome = async (hearingId, outcome) => {
+    setSubmitting((s) => ({ ...s, [hearingId]: true }));
+    setErrorMessages((e) => ({ ...e, [hearingId]: "" }));
+    setSuccessMessages((s) => ({ ...s, [hearingId]: "" }));
+
+    try {
+      const res = await api.patch(`/hearings/${hearingId}/outcome`, {
+        outcome,
+        remarks: remarkInputs[hearingId] || undefined,
+      });
+
+      setSuccessMessages((s) => ({ ...s, [hearingId]: `Recorded: ${outcome}` }));
+      setNextDates((n) => ({ ...n, [hearingId]: res.nextEligibleDate }));
+
+      // Mark the hearing as completed locally so buttons disappear
+      setHearings((prev) =>
+        prev.map((h) =>
+          h.id === hearingId ? { ...h, outcome } : h
+        )
+      );
+    } catch (err) {
+      setErrorMessages((e) => ({ ...e, [hearingId]: err.message || "Failed to record outcome." }));
+    } finally {
+      setSubmitting((s) => ({ ...s, [hearingId]: false }));
+    }
+  };
+
+  const getTrackBadge = (trackName) => {
+    switch (trackName) {
+      case "FAST":    return "bg-blue-100 text-blue-800 border-blue-200";
+      case "STANDARD": return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "COMPLEX": return "bg-purple-100 text-purple-800 border-purple-200";
+      default:        return "bg-slate-100 text-slate-700 border-slate-200";
+    }
+  };
+
+  const getOutcomePill = (outcome) => {
+    switch (outcome) {
+      case "HEARD":    return "bg-emerald-100 text-emerald-800";
+      case "ADJOURNED": return "bg-amber-100 text-amber-800";
+      case "DISPOSED": return "bg-slate-200 text-slate-700";
+      default:         return "bg-blue-100 text-blue-800";
+    }
+  };
+
+  const pendingHearings = hearings.filter((h) => h.outcome === "SCHEDULED");
+  const completedHearings = hearings.filter((h) => h.outcome !== "SCHEDULED");
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
+        {[1, 2].map((i) => (
+          <div key={i} className="bg-white border border-slate-200 rounded-xl p-6 animate-pulse space-y-3">
+            <div className="h-4 bg-slate-200 rounded w-1/3"></div>
+            <div className="h-3 bg-slate-100 rounded w-1/2"></div>
+            <div className="h-8 bg-slate-100 rounded w-full"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Header */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900 mb-2">⚖️ Judicial Bench & Hearing Outcomes</h1>
-        <p className="text-sm text-slate-500 mb-4">
-          Judge-only cause list execution view with HEARD, ADJOURNED, and DISPOSED outcome recording. (Implemented on Day 6).
-        </p>
-        <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-800">
-          🔒 Restricted to <strong>JUDGE</strong> role.
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">⚖️ My Bench — Today's Cause List</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Listing date: <span className="font-mono font-semibold text-slate-700">{date}</span>
+              {user?.judge && (
+                <> &nbsp;•&nbsp; Courtroom <span className="font-semibold">{user.judge.courtroom}</span></>
+              )}
+            </p>
+          </div>
+          <button
+            onClick={fetchHearings}
+            className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg transition"
+          >
+            ↻ Refresh
+          </button>
         </div>
       </div>
+
+      {error && (
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!error && hearings.length === 0 && (
+        <div className="bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center text-slate-500">
+          <span className="text-4xl">📭</span>
+          <p className="font-semibold text-slate-700 mt-3">No hearings listed for today.</p>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Ask the Court Clerk to generate your cause list for today from the Cause List page.
+          </p>
+        </div>
+      )}
+
+      {/* Pending hearings — action required */}
+      {pendingHearings.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            Awaiting Outcome ({pendingHearings.length})
+          </h2>
+          {pendingHearings.map((h, index) => {
+            const c = h.case;
+            const petitioners = c?.parties?.filter((p) => p.role === "PETITIONER").map((p) => p.name).join(", ");
+            const respondents = c?.parties?.filter((p) => p.role === "RESPONDENT").map((p) => p.name).join(", ");
+            const isSubmitting = submitting[h.id];
+
+            return (
+              <div key={h.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                {/* Case Header */}
+                <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-start gap-3 justify-between">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-bold text-slate-400">Item {index + 1}</span>
+                      <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
+                        {c?.caseNumber}
+                      </span>
+                      <span className={`px-2 py-0.5 text-[11px] font-bold border rounded-full ${getTrackBadge(c?.track?.name)}`}>
+                        {c?.track?.name}
+                      </span>
+                      {c?.isUrgent && (
+                        <span className="px-2 py-0.5 text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded-full">
+                          URGENT
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-semibold text-slate-900 text-sm">{c?.title}</p>
+                    <p className="text-xs text-slate-500">
+                      {petitioners} <span className="text-slate-400 mx-1">vs</span> {respondents}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0 text-xs text-slate-500">
+                    <span>Priority: <span className="font-bold text-slate-800">{c?.priorityScore?.toFixed(1)}</span></span>
+                    <span>Adj.: <span className="font-semibold">{c?.adjournmentCount}</span></span>
+                    <Link
+                      to={`/cases/${c?.id}`}
+                      className="text-blue-600 hover:underline font-semibold mt-1"
+                    >
+                      View Full Dossier →
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Outcome Controls */}
+                <div className="p-5 bg-slate-50/50 space-y-3">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Bench Remarks (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    maxLength={500}
+                    placeholder="Notes on today's proceedings, evidence filed, next steps..."
+                    value={remarkInputs[h.id] || ""}
+                    onChange={(e) =>
+                      setRemarkInputs((r) => ({ ...r, [h.id]: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      disabled={isSubmitting}
+                      onClick={() => recordOutcome(h.id, "HEARD")}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition"
+                    >
+                      ✓ Mark HEARD
+                    </button>
+                    <button
+                      disabled={isSubmitting}
+                      onClick={() => recordOutcome(h.id, "ADJOURNED")}
+                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition"
+                    >
+                      ↻ ADJOURN
+                    </button>
+                    <button
+                      disabled={isSubmitting}
+                      onClick={() => recordOutcome(h.id, "DISPOSED")}
+                      className="px-4 py-2 bg-slate-700 hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition"
+                    >
+                      ✕ DISPOSE
+                    </button>
+                  </div>
+
+                  {errorMessages[h.id] && (
+                    <p className="text-xs text-rose-600 font-medium">{errorMessages[h.id]}</p>
+                  )}
+                  {successMessages[h.id] && (
+                    <p className="text-xs text-emerald-700 font-semibold">
+                      {successMessages[h.id]}
+                      {nextDates[h.id] && (
+                        <> — Next eligible listing: <span className="font-mono">{nextDates[h.id]}</span></>
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      )}
+
+      {/* Completed hearings — read-only summary */}
+      {completedHearings.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Completed Today ({completedHearings.length})
+          </h2>
+          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+            {completedHearings.map((h) => {
+              const c = h.case;
+              return (
+                <div key={h.id} className="px-5 py-3.5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-xs font-bold text-slate-600 shrink-0">
+                      {c?.caseNumber}
+                    </span>
+                    <span className="text-sm text-slate-700 truncate">{c?.title}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {h.remarks && (
+                      <span className="text-xs text-slate-400 italic truncate max-w-[180px]" title={h.remarks}>
+                        "{h.remarks}"
+                      </span>
+                    )}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase ${getOutcomePill(h.outcome)}`}>
+                      {h.outcome}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
-
