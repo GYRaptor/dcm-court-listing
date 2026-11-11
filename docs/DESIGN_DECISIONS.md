@@ -58,19 +58,32 @@ Technology must assist judicial discretion, not replace it. Algorithms cannot fo
 
 ---
 
-## 4. Priority Score Formula
+## 4. Priority Score Formula & Adjournment Ceiling
 Cause list scheduling sorts eligible cases by priority in descending order:
 
-$$\text{Priority Score} = \left(\frac{\text{Age in Days}}{\text{Track Target Days}} \times 100\right) + (\text{isUrgent} \ ? \ 30 : 0) + (\text{Adjournment Count} \times 5)$$
+$$\text{Priority Score} = \left(\frac{\text{Age in Days}}{\text{Track Target Days}} \times 100\right) + (\text{isUrgent} \ ? \ 30 : 0) + \min(5 \times \text{Adjournment Count}, 25)$$
 
 - **Share of Allowed Time Used**: $\left(\frac{\text{Age in Days}}{\text{Target Days}} \times 100\right)$ normalizes urgency across tracks. A 60-day-old FAST case (target 90d) has consumed 66.7% of its target, whereas a 60-day-old COMPLEX case (target 730d) has only consumed 8.2%. The FAST case rightfully receives higher listing priority.
 - **Urgency Bump**: $+30$ points if `isUrgent` is flagged by the registry.
-- **Adjournment Escalation**: $+5$ points for each past adjournment to prevent chronic postponement.
-- **Output**: Rounded to 1 decimal place.
+- **Adjournment Escalation with Ceiling**: $+5$ points for each past adjournment to prevent chronic postponement, capped strictly at $25$ points (`Math.min(5 * adjournmentCount, 25)`). Capping prevents chronic, heavily adjourned legacy disputes from permanently monopolizing the top of the daily cause list over newer, time-critical matters.
+- **Output**: Rounded strictly to 1 decimal place.
 
 ---
 
-## 5. Audit Logging Architecture
+## 5. Greedy Judge Workload Assignment
+Courtrooms should maintain balanced workloads so that no single judge is overwhelmed while others have light dockets.
+
+- **Why Simple Case Counts Fail**: A simple count heuristic treats a 1-point summary bail hearing identically to a 7-point multi-party property dispute. Assigning three complex trials to Judge A and three bail hearings to Judge B produces an appearance of equal distribution (3 cases each), but Judge A carries 21 complexity points while Judge B carries only 3.
+- **Greedy Total Complexity Minimization**: When a new case is registered, the assignment algorithm retrieves all active judges and calculates their current active load:
+
+$$\text{Workload}(J) = \sum_{c \in \text{Cases}(J), \ \text{status} \in \{\text{PENDING}, \ \text{LISTED}\}} \text{complexity}(c)$$
+
+- **Assignment**: The new case is assigned to the judge with $\min(\text{Workload}(J))$. Ties are broken deterministically by judicial ID or capacity.
+- **Dynamic Workload Metric**: Once a case transitions to `DISPOSED`, its complexity is removed from the judge's active workload, freeing capacity for subsequent assignments.
+
+---
+
+## 6. Audit Logging Architecture
 Court management software demands strict compliance and evidentiary auditability. The `AuditLog` model captures:
 - `userId`: Identity of the clerk or judge initiating the action.
 - `action`: Specific standardized events (`CASE_REGISTERED`, `TRACK_APPROVED`, `TRACK_OVERRIDDEN`, `HEARING_SCHEDULED`, `OUTCOME_RECORDED`).
@@ -82,19 +95,26 @@ Judges have exclusive access to review the registry audit trail (`GET /audit-log
 
 ---
 
-## 6. Date Handling: Calendar Dates & Timezones (IST vs UTC)
+## 7. Date Handling: Calendar Dates & Timezones (IST vs UTC)
 Court scheduling operates on discrete **calendar dates** (e.g., "Hearing on November 10, 2026"), not point-in-time timestamps.
-- **Storage**: Dates (`filingDate`, `targetDisposalDate`, `earliestNextDate`, `hearingDate`) are stored in PostgreSQL as ISO 8601 timestamps normalized to midnight UTC (`YYYY-MM-DDT00:00:00.000Z`).
-- **Date Arithmetic**: Calculations for target dates (`filingDate + targetDays`) and hearing intervals (`hearingDate + gapDays`) use day-based integer arithmetic (`addDays`), avoiding clock-drift or daylight-saving anomalies.
-- **Display**: The React frontend parses UTC midnight timestamps and formats them in Indian Standard Time (IST / `en-IN`), displaying calendar dates consistently across client devices.
+- **Storage**: Dates (`filingDate`, `targetDisposalDate`, `earliestNextDate`, `hearingDate`, `disposedDate`) are stored in PostgreSQL using native `@db.Date` types. This prevents hour/minute fields from corrupting date identity.
+- **Date Arithmetic**: The custom `server/src/utils/dates.js` module calculates target dates (`filingDate + targetDays`), aging, and hearing intervals (`hearingDate + gapDays`) using discrete day math (`addDays`, `daysBetween`) based on `todayIST()` (Asia/Kolkata timezone). This guarantees identical calendar day evaluations regardless of whether server compute runs in UTC or locally in IST.
+- **Display**: Pure `YYYY-MM-DD` strings are rendered cleanly without timezone shifts across all client devices.
 
 ---
 
-## 7. Project Assumptions
+## 8. Lawyer & Public Case Lookup
+Advocates and litigants need real-time visibility into their case progress, track assignment, and next hearing date without accessing confidential judicial actions or administrative queues.
+- **Wildcard Route**: Because case numbers contain slashes (e.g., `DCM/2026/0001`), standard Express `:caseNumber` parameters truncate at the first slash. The backend uses `GET /cases/lookup/:caseNumber(*)` to capture the full case number.
+- **Information Boundary**: The lookup endpoint returns only public docket information: case number, title, type, status, filing date, assigned track, priority score, target disposal date, earliest next date, and assigned judge courtroom. Internal administrative notes and audit entries are excluded.
+
+---
+
+## 9. Project Assumptions
 Because Ministry of Law and Justice Problem Statement 147 defines the broad objective without prescribing micro-level administrative parameters, the following explicit assumptions are established:
 1. **Configurable Track Parameters**: Target disposal days (90, 365, 730) and gap days (7, 21, 45) are configured in the `Track` database table, allowing judicial administrative committees to adjust policies without code changes.
 2. **Two-Year Ceiling**: All tracks are bounded by the statutory 730-day upper limit.
 3. **Aging Definition**: A case is flagged as **Aging** if it remains undisposed after 5 years from its filing date. This is an informational registry flag and does not create a fourth track.
 4. **Overdue Definition**: A case is flagged as **Overdue** if its current status is not `DISPOSED` and today's date exceeds `targetDisposalDate`.
-5. **Judge Allocation**: Unassigned new cases are automatically assigned to the judge on the bench currently holding the fewest active `PENDING` cases (load-balancing heuristic).
+5. **Greedy Workload Allocation**: Unassigned new cases are automatically assigned to the judge with the lowest cumulative complexity across active (`PENDING` and `LISTED`) cases.
 
