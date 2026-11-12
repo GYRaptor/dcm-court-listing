@@ -111,16 +111,16 @@ export default function CauseList() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 w-full md:w-auto">
             {/* Judge Selector */}
-            <div>
+            <div className="flex-1 sm:flex-initial">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                 Courtroom / Judge
               </label>
               <select
                 value={selectedJudgeId}
                 onChange={(e) => setSelectedJudgeId(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {judges.map((j) => (
                   <option key={j.id} value={j.id}>
@@ -131,7 +131,7 @@ export default function CauseList() {
             </div>
 
             {/* Date Selector */}
-            <div>
+            <div className="flex-1 sm:flex-initial">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                 Listing Date
               </label>
@@ -139,23 +139,23 @@ export default function CauseList() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                className="w-full sm:w-auto px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-end gap-2 pt-5">
+            <div className="flex items-center gap-2 pt-1 sm:pt-0">
               <button
                 onClick={handleFetchList}
                 disabled={loading || generating}
-                className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg transition disabled:opacity-50"
+                className="flex-1 sm:flex-initial px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg transition disabled:opacity-50 text-center"
               >
                 {loading ? "Checking..." : "View Existing"}
               </button>
               <button
                 onClick={handleGenerate}
                 disabled={generating || loading}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition disabled:opacity-50"
+                className="flex-1 sm:flex-initial px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition disabled:opacity-50 text-center"
               >
                 {generating ? "Scheduling..." : "⚡ Generate Cause List"}
               </button>

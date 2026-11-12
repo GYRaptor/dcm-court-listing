@@ -12,7 +12,7 @@ export default function Navbar() {
   };
 
   const navLinkClass = ({ isActive }) =>
-    `px-3 py-1.5 rounded-md text-sm font-medium transition ${
+    `px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm font-medium transition whitespace-nowrap ${
       isActive
         ? "bg-blue-700 text-white shadow-sm"
         : "text-slate-200 hover:bg-slate-800 hover:text-white"
@@ -42,7 +42,7 @@ export default function Navbar() {
         </div>
 
         {/* Dynamic Navigation Links by Role */}
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-1 max-w-[calc(100vw-140px)] sm:max-w-none">
           {user ? (
             <>
               {/* CLERK Navigation */}
