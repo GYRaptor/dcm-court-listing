@@ -7,6 +7,7 @@ import judgeRoutes from "./routes/judge.routes.js";
 import causeListRoutes from "./routes/causelist.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import hearingRoutes from "./routes/hearing.routes.js";
+import auditRoutes from "./routes/audit.routes.js";
 
 // Load environment variables from .env
 dotenv.config();
@@ -32,6 +33,7 @@ app.use("/judges", judgeRoutes);
 app.use("/cause-list", causeListRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/hearings", hearingRoutes);
+app.use("/audit-log", auditRoutes);
 
 // Health check endpoint for verifying server uptime and deployment status
 app.get("/health", (req, res) => {
