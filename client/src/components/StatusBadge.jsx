@@ -1,93 +1,95 @@
 import React from "react";
 
-export default function StatusBadge({ type, value, label, className = "" }) {
-  const normalized = (value || "").toUpperCase();
+export default function StatusBadge({
+  type,
+  value,
+  label,
+  track,
+  status,
+  urgency,
+  outcome,
+  className = "",
+}) {
+  const resolvedValue = (track || status || urgency || outcome || value || "").toUpperCase();
+  const isTrack = Boolean(track) || type === "track" || ["FAST", "STANDARD", "COMPLEX"].includes(resolvedValue);
+  const isUrgent = Boolean(urgency) || type === "urgent" || resolvedValue === "URGENT";
+  const isOutcome = Boolean(outcome) || type === "outcome" || ["SCHEDULED", "HEARD", "ADJOURNED", "DISPOSED"].includes(resolvedValue);
 
-  let styles = "bg-slate-50 text-slate-700 ring-slate-600/20";
-
-  if (type === "track") {
-    switch (normalized) {
-      case "FAST":
-        styles = "bg-blue-50 text-blue-700 ring-blue-600/20";
-        break;
-      case "STANDARD":
-        styles = "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-        break;
-      case "COMPLEX":
-        styles = "bg-purple-50 text-purple-700 ring-purple-600/20";
-        break;
-      default:
-        styles = "bg-slate-50 text-slate-700 ring-slate-600/20";
+  // Tracks: Small outlined labels in small caps with letter-spacing, using navy tints
+  if (isTrack) {
+    if (resolvedValue === "FAST") {
+      return (
+        <span
+          className={`inline-flex items-center border border-[#6B88AB]/50 text-[#3E6088] font-caps px-1.5 py-0.5 rounded-[2px] bg-transparent ${className}`}
+        >
+          {label || "FAST"}
+        </span>
+      );
     }
-  } else if (type === "urgent" || normalized === "URGENT") {
-    styles = "bg-rose-50 text-rose-700 ring-rose-600/20";
-  } else if (type === "overdue" || normalized === "OVERDUE") {
-    styles = "bg-rose-50 text-rose-700 ring-rose-600/20";
-  } else if (type === "aging" || normalized === "AGING") {
-    styles = "bg-amber-50 text-amber-700 ring-amber-600/20";
-  } else if (type === "approval") {
-    styles = value
-      ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-      : "bg-amber-50 text-amber-700 ring-amber-600/20";
-  } else if (type === "outcome") {
-    switch (normalized) {
-      case "HEARD":
-        styles = "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-        break;
-      case "ADJOURNED":
-        styles = "bg-amber-50 text-amber-700 ring-amber-600/20";
-        break;
-      case "DISPOSED":
-        styles = "bg-slate-100 text-slate-700 ring-slate-600/10";
-        break;
-      case "SCHEDULED":
-      default:
-        styles = "bg-blue-50 text-blue-700 ring-blue-600/20";
+    if (resolvedValue === "STANDARD") {
+      return (
+        <span
+          className={`inline-flex items-center border border-[#3E6088]/60 text-[#1F3A5F] font-caps px-1.5 py-0.5 rounded-[2px] bg-transparent ${className}`}
+        >
+          {label || "STANDARD"}
+        </span>
+      );
     }
-  } else if (type === "status") {
-    switch (normalized) {
-      case "PENDING":
-        styles = "bg-blue-50 text-blue-700 ring-blue-600/20";
-        break;
-      case "LISTED":
-        styles = "bg-purple-50 text-purple-700 ring-purple-600/20";
-        break;
-      case "DISPOSED":
-        styles = "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-        break;
-      default:
-        styles = "bg-slate-50 text-slate-700 ring-slate-600/20";
-    }
-  } else if (type === "action") {
-    switch (normalized) {
-      case "CASE_REGISTERED":
-        styles = "bg-blue-50 text-blue-700 ring-blue-600/20";
-        break;
-      case "TRACK_APPROVED":
-        styles = "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-        break;
-      case "TRACK_OVERRIDDEN":
-        styles = "bg-purple-50 text-purple-700 ring-purple-600/20";
-        break;
-      case "CAUSE_LIST_GENERATED":
-        styles = "bg-amber-50 text-amber-700 ring-amber-600/20";
-        break;
-      case "OUTCOME_RECORDED":
-        styles = "bg-slate-50 text-slate-700 ring-slate-600/20";
-        break;
-      default:
-        styles = "bg-slate-50 text-slate-700 ring-slate-600/20";
-    }
+    return (
+      <span
+        className={`inline-flex items-center border border-[#1F3A5F] text-[#1F3A5F] font-caps px-1.5 py-0.5 rounded-[2px] bg-transparent font-bold ${className}`}
+      >
+        {label || "COMPLEX"}
+      </span>
+    );
   }
 
-  const displayText = label || value;
+  // Urgency: Small text flag in oxblood
+  if (isUrgent) {
+    return (
+      <span className={`inline-flex items-center gap-1 text-xs font-semibold text-oxblood ${className}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-oxblood shrink-0"></span>
+        <span>{label || "Urgent"}</span>
+      </span>
+    );
+  }
 
+  // Hearing outcomes: plain text with muted or subtle indicator
+  if (isOutcome) {
+    const outcomeText = label || resolvedValue;
+    return (
+      <span className={`inline-flex items-center gap-1.5 text-xs text-muted font-medium ${className}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-rule shrink-0"></span>
+        <span className="font-mono text-[11px] tracking-wide">{outcomeText}</span>
+      </span>
+    );
+  }
+
+  // Case Status: Plain text with small colored dot (not a pill)
+  if (status || type === "status") {
+    let dotColor = "bg-muted";
+    let textColor = "text-muted";
+
+    if (resolvedValue === "LISTED") {
+      dotColor = "bg-accent";
+      textColor = "text-accent font-medium";
+    } else if (resolvedValue === "DISPOSED") {
+      dotColor = "bg-rule";
+      textColor = "text-muted";
+    }
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 text-xs ${textColor} ${className}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dotColor} shrink-0`}></span>
+        <span className="font-sans">{label || resolvedValue}</span>
+      </span>
+    );
+  }
+
+  // Audit actions: Quiet plain monospace text
   return (
-    <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${styles} ${className}`}
-    >
-      {displayText}
+    <span className={`font-mono text-[11px] text-muted ${className}`}>
+      {label || resolvedValue}
     </span>
   );
 }
-

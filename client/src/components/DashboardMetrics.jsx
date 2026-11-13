@@ -25,15 +25,12 @@ export default function DashboardMetrics() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="border-y border-rule py-4 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-rule">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] animate-pulse space-y-3"
-          >
-            <div className="h-3 bg-slate-100 rounded w-1/3"></div>
-            <div className="h-7 bg-slate-200/70 rounded w-1/4"></div>
-            <div className="h-3 bg-slate-100 rounded w-2/3"></div>
+          <div key={i} className="px-4 py-2 space-y-2 animate-pulse">
+            <div className="h-3 bg-rule/50 rounded w-1/3"></div>
+            <div className="h-8 bg-rule/70 rounded w-1/4"></div>
+            <div className="h-3 bg-rule/40 rounded w-2/3"></div>
           </div>
         ))}
       </div>
@@ -42,14 +39,11 @@ export default function DashboardMetrics() {
 
   if (error) {
     return (
-      <div className="p-4 bg-rose-50/70 border border-rose-200/80 rounded-xl text-sm text-rose-800 flex items-center justify-between">
-        <div>
-          <p className="font-semibold text-rose-900">Unable to load metrics</p>
-          <p className="text-xs text-rose-600 mt-0.5">{error}</p>
-        </div>
+      <div className="border border-oxblood/30 bg-oxblood-light/40 p-4 rounded-[4px] text-xs text-oxblood flex items-center justify-between">
+        <span>Unable to load metrics: {error}</span>
         <button
           onClick={fetchStats}
-          className="px-3 py-1 bg-rose-600 hover:bg-rose-700 active:scale-[0.99] text-white rounded-lg text-xs font-semibold shadow-sm transition"
+          className="text-xs text-accent underline font-medium hover:text-accent-hover"
         >
           Retry
         </button>
@@ -58,72 +52,44 @@ export default function DashboardMetrics() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {/* Total Pending Card */}
-        <div className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-slate-300 transition-all duration-150">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              Total Pending
-            </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-600 text-xs font-medium ring-1 ring-inset ring-blue-600/20">
-              📁
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
-              {stats?.totalPending ?? 0}
-            </span>
-            <span className="text-xs text-slate-400">cases awaiting trial</span>
-          </div>
-          <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-            Active filings awaiting or undergoing differentiated track management.
-          </p>
+    <div className="border-y border-rule py-4 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-rule">
+      {/* Pending Cases */}
+      <div className="py-2 sm:py-0 sm:px-6 first:pl-0">
+        <span className="font-caps text-muted block mb-1">
+          Pending cases
+        </span>
+        <div className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-ink tabular-nums">
+          {stats?.totalPending ?? 0}
         </div>
+        <p className="text-xs text-muted mt-1">
+          Active cases awaiting trial or hearing listing
+        </p>
+      </div>
 
-        {/* Overdue Cases Card */}
-        <div className="p-5 bg-white border border-rose-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-rose-300 transition-all duration-150">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-rose-700">
-              Overdue Cases
-            </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-rose-50 text-rose-700 text-xs font-medium ring-1 ring-inset ring-rose-600/20">
-              ⚠️
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-rose-600 tabular-nums">
-              {stats?.overdueCases ?? 0}
-            </span>
-            <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
-              past target
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-            Matters exceeding target disposal date (FAST: 90d, STD: 365d, CPLX: 730d).
-          </p>
+      {/* Cases Past Target Date (Oxblood) */}
+      <div className="py-3 sm:py-0 sm:px-6">
+        <span className="font-caps text-oxblood block mb-1">
+          Past target date
+        </span>
+        <div className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-oxblood tabular-nums">
+          {stats?.overdueCases ?? 0}
         </div>
+        <p className="text-xs text-muted mt-1">
+          Cases exceeding configured track target days
+        </p>
+      </div>
 
-        {/* Average Age Card */}
-        <div className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-slate-300 transition-all duration-150">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              Average Age
-            </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-amber-50 text-amber-700 text-xs font-medium ring-1 ring-inset ring-amber-600/20">
-              ⏳
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
-              {stats?.averageAge ?? 0}
-            </span>
-            <span className="text-xs text-slate-400 font-medium">calendar days</span>
-          </div>
-          <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-            Mean days elapsed since initial filing date across all active court matters.
-          </p>
+      {/* Average Case Age */}
+      <div className="py-2 sm:py-0 sm:px-6 last:pr-0">
+        <span className="font-caps text-muted block mb-1">
+          Average age (days)
+        </span>
+        <div className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-ink tabular-nums">
+          {stats?.averageAge ?? 0}
         </div>
+        <p className="text-xs text-muted mt-1">
+          Mean calendar days elapsed since initial filing
+        </p>
       </div>
     </div>
   );
