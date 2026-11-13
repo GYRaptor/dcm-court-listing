@@ -25,7 +25,6 @@ export default function Register() {
 
     try {
       await register(name, email, password);
-      // New self-registered advocates are redirected to lookup
       navigate("/lookup");
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -35,37 +34,34 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <span className="text-4xl">🏛️</span>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-            Advocate Registration
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Enroll for public case lookup & hearing track status
-          </p>
-        </div>
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
+          Advocate Registration
+        </h1>
+        <p className="text-xs font-mono uppercase tracking-wider text-muted mt-0.5">
+          Chamber Enrollment for Public Docket Access
+        </p>
+        <div className="rule-double max-w-[200px] mx-auto mt-3"></div>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-sm border border-slate-200 rounded-xl sm:px-10">
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-lg">
-            ℹ️ <strong>Court Policy Notice:</strong> Self-registration provisions accounts with the{" "}
-            <strong>LAWYER</strong> role. Judicial and Clerk designations are issued by the Principal Registrar.
+        <div className="bg-surface py-8 px-6 border border-rule rounded-[4px] sm:px-10 space-y-6">
+          <div className="p-3 bg-paper border border-rule text-muted text-xs rounded-[3px]">
+            <strong className="text-ink">Court Policy Notice:</strong> Self-registration provisions accounts with the{" "}
+            <span className="font-mono text-ink">LAWYER</span> role for read-only docket inspection. Judicial and Clerk credentials are administered by the registry.
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-lg flex items-start gap-2">
-              <span className="font-bold">⚠️</span>
-              <span>{error}</span>
+            <div className="p-3 bg-oxblood-light border border-oxblood/30 text-oxblood text-xs rounded-[3px]">
+              {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                Full Name & Title
+              <label className="block font-caps text-[11px] text-muted mb-1">
+                Full Name &amp; Title
               </label>
               <input
                 type="text"
@@ -73,12 +69,12 @@ export default function Register() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Adv. Ananya Deshmukh"
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 bg-paper border border-rule rounded-[3px] text-xs font-sans text-ink focus:outline-none focus:border-accent"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
+              <label className="block font-caps text-[11px] text-muted mb-1">
                 Email Address
               </label>
               <input
@@ -87,12 +83,12 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ananya.lawyer@barcouncil.org"
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 bg-paper border border-rule rounded-[3px] text-xs font-sans text-ink focus:outline-none focus:border-accent"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
+              <label className="block font-caps text-[11px] text-muted mb-1">
                 Password (min. 8 characters)
               </label>
               <input
@@ -102,30 +98,23 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 bg-paper border border-rule rounded-[3px] text-xs font-sans text-ink focus:outline-none focus:border-accent"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition"
+              className="w-full flex justify-center py-2 px-4 rounded-[3px] text-xs font-medium text-surface bg-accent hover:bg-accent-hover transition disabled:opacity-50"
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Enrolling Advocate...
-                </span>
-              ) : (
-                "Complete Registration"
-              )}
+              {loading ? "Enrolling advocate..." : "Complete registration"}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-slate-500">
-            Already have an official account?{" "}
-            <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-500">
-              Sign In
+          <div className="text-center text-xs text-muted pt-2 border-t border-rule">
+            Already registered?{" "}
+            <Link to="/login" className="font-mono text-accent hover:underline">
+              Sign in &rarr;
             </Link>
           </div>
         </div>
@@ -133,4 +122,3 @@ export default function Register() {
     </div>
   );
 }
-
