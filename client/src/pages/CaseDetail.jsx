@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api.js";
+import StatusBadge from "../components/StatusBadge.jsx";
 
 export default function CaseDetail() {
   const { id } = useParams();
@@ -160,18 +161,8 @@ export default function CaseDetail() {
               <span className="font-mono text-lg sm:text-xl font-bold text-blue-700 tabular-nums">
                 {caseData.caseNumber}
               </span>
-              <span
-                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium uppercase font-mono ${getStatusBadge(
-                  caseData.status
-                )}`}
-              >
-                {caseData.status}
-              </span>
-              {caseData.isUrgent && (
-                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
-                  Urgent
-                </span>
-              )}
+              <StatusBadge status={caseData.status} />
+              {caseData.isUrgent && <StatusBadge urgency="Urgent" />}
               {caseData.isOverdue && (
                 <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
                   Overdue
@@ -205,23 +196,23 @@ export default function CaseDetail() {
         {/* Quick Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
           <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
-            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Complexity</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Complexity</span>
             <span className="font-bold text-slate-800 text-sm sm:text-base tabular-nums">{caseData.complexity} pts</span>
           </div>
           <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
-            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Active Track</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Active Track</span>
             <span className="font-bold text-blue-700 text-sm sm:text-base tabular-nums">
               {caseData.track?.name} ({caseData.track?.targetDays}d)
             </span>
           </div>
           <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
-            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Recommended</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Recommended</span>
             <span className="font-bold text-slate-700 text-sm sm:text-base">
               {caseData.suggestedTrack?.name}
             </span>
           </div>
           <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
-            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Expert Evidence</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Expert Evidence</span>
             <span className="font-bold text-slate-700 text-sm sm:text-base">
               {caseData.hasExpertEvidence ? "Yes" : "No"}
             </span>
@@ -391,33 +382,24 @@ export default function CaseDetail() {
           </p>
         ) : (
           <div className="divide-y divide-slate-100">
-            {caseData.hearings.map((h) => {
-              const outcomeBadge =
-                h.outcome === "HEARD"     ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" :
-                h.outcome === "ADJOURNED" ? "bg-amber-50 text-amber-700 ring-amber-600/20" :
-                h.outcome === "DISPOSED"  ? "bg-slate-50 text-slate-700 ring-slate-600/20" :
-                                            "bg-blue-50 text-blue-700 ring-blue-600/20";
-              return (
-                <div key={h.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono font-medium text-slate-700 tabular-nums">{h.hearingDate}</span>
-                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase font-mono ring-1 ring-inset ${outcomeBadge}`}>
-                      {h.outcome}
-                    </span>
-                    {h.remarks && (
-                      <span className="italic text-slate-400 max-w-xs truncate" title={h.remarks}>
-                        "{h.remarks}"
-                      </span>
-                    )}
-                  </div>
-                  {h.judge && (
-                    <span className="text-[11px] text-slate-400 shrink-0">
-                      Presided: {h.judge?.user?.name || "—"}
+            {caseData.hearings.map((h) => (
+              <div key={h.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono font-medium text-slate-700 tabular-nums">{h.hearingDate}</span>
+                  <StatusBadge outcome={h.outcome} />
+                  {h.remarks && (
+                    <span className="italic text-slate-400 max-w-xs truncate" title={h.remarks}>
+                      "{h.remarks}"
                     </span>
                   )}
                 </div>
-              );
-            })}
+                {h.judge && (
+                  <span className="text-[11px] text-slate-400 shrink-0">
+                    Presided: {h.judge?.user?.name || "—"}
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         )}
         {/* Next eligible listing date */}

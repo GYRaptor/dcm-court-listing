@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api.js";
+import StatusBadge from "../components/StatusBadge.jsx";
+import { SkeletonTable } from "../components/SkeletonLoader.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 
 export default function Cases() {
   const { user } = useAuth();
@@ -200,25 +203,33 @@ export default function Cases() {
       )}
 
       {/* Loading Skeletons */}
-      {loading && (
-        <div className="bg-white border border-slate-200/80 rounded-xl p-8 shadow-[0_1px_3px_rgba(15,23,42,0.04)] animate-pulse space-y-3">
-          <div className="h-4 bg-slate-200/70 rounded w-1/4"></div>
-          <div className="h-10 bg-slate-100 rounded-lg"></div>
-          <div className="h-10 bg-slate-100 rounded-lg"></div>
-          <div className="h-10 bg-slate-100 rounded-lg"></div>
-        </div>
-      )}
+      {loading && <SkeletonTable rows={6} cols={8} />}
 
       {/* Cases Table */}
       {!loading && !error && (
         <div className="bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] overflow-hidden">
           {cases.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 space-y-2">
-              <span className="text-3xl">📂</span>
-              <p className="text-sm font-semibold text-slate-700">No cases found</p>
-              <p className="text-xs text-slate-400">
-                No court matters match the current filter criteria.
-              </p>
+            <div className="p-6">
+              <EmptyState
+                icon="📂"
+                title="No cases found"
+                description="No court matters match the current filter criteria."
+                actionLabel={
+                  trackFilter || statusFilter || approvedFilter || judgeFilter
+                    ? "Reset Filters"
+                    : undefined
+                }
+                onAction={
+                  trackFilter || statusFilter || approvedFilter || judgeFilter
+                    ? () => {
+                        setTrackFilter("");
+                        setStatusFilter("");
+                        setApprovedFilter("");
+                        setJudgeFilter("");
+                      }
+                    : undefined
+                }
+              />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -275,13 +286,7 @@ export default function Cases() {
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium tabular-nums ${getTrackBadge(
-                            c.track?.name
-                          )}`}
-                        >
-                          {c.track?.name} ({c.track?.targetDays}d)
-                        </span>
+                        <StatusBadge track={c.track?.name} />
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -308,13 +313,7 @@ export default function Cases() {
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono font-medium uppercase ${getStatusBadge(
-                            c.status
-                          )}`}
-                        >
-                          {c.status}
-                        </span>
+                        <StatusBadge status={c.status} />
                       </td>
 
                       <td className="px-4 py-3 text-right whitespace-nowrap">
