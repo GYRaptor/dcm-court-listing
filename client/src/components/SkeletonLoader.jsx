@@ -46,3 +46,4 @@ export default function SkeletonLoader({ type = "card", ...props }) {
   }
   return <SkeletonCard {...props} />;
 }
+

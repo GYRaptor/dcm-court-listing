@@ -29,9 +29,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+        <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans antialiased">
           <Navbar />
-          <main className="flex-1">
+          <main className="flex-1 w-full pb-10">
             <Routes>
               {/* Root route redirects appropriately */}
               <Route path="/" element={<HomeRedirect />} />

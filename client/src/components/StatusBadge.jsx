@@ -90,3 +90,4 @@ export default function StatusBadge({ type, value, label, className = "" }) {
     </span>
   );
 }
+
