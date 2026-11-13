@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api.js";
 import DashboardMetrics from "../components/DashboardMetrics.jsx";
-import SkeletonLoader from "../components/SkeletonLoader.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
 import {
   BarChart,
@@ -12,7 +11,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   Cell,
 } from "recharts";
@@ -40,26 +38,50 @@ export default function Dashboard() {
     fetchAnalytics();
   }, []);
 
-  const TRACK_COLORS = {
-    FAST: "#3B82F6",
-    STANDARD: "#10B981",
-    COMPLEX: "#8B5CF6",
+  // Aggregated workload by courtroom to eliminate duplicates from database seed
+  const aggregatedWorkloads = useMemo(() => {
+    if (!analytics?.judgeWorkloads) return [];
+    const map = new Map();
+    for (const item of analytics.judgeWorkloads) {
+      const courtroom = item.courtroom || "Unassigned";
+      if (!map.has(courtroom)) {
+        map.set(courtroom, {
+          courtroom,
+          activeCases: 0,
+          totalComplexity: 0,
+          judgeNames: [],
+        });
+      }
+      const existing = map.get(courtroom);
+      existing.activeCases += item.activeCases || 0;
+      existing.totalComplexity += item.totalComplexity || 0;
+      if (item.name && !existing.judgeNames.includes(item.name)) {
+        existing.judgeNames.push(item.name);
+      }
+    }
+    return Array.from(map.values());
+  }, [analytics]);
+
+  const TRACK_NAVY_TINTS = {
+    FAST: "#6B88AB",
+    STANDARD: "#3E6088",
+    COMPLEX: "#1F3A5F",
   };
 
   const CustomAgeTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-md border border-slate-200/80 text-xs space-y-1">
-          <p className="font-semibold text-slate-900">{label} Track</p>
-          <p className="text-blue-700 font-medium">
-            Average Age: <span className="font-mono tabular-nums font-bold">{data.averageAge}d</span>
+        <div className="bg-surface p-3 rounded-[4px] border border-rule text-xs space-y-1 shadow-sm">
+          <p className="font-semibold text-ink">{label} Track</p>
+          <p className="text-muted">
+            Average age: <span className="font-mono tabular-nums font-semibold text-ink">{data.averageAge}d</span>
           </p>
-          <p className="text-slate-500">
-            Target Disposal: <span className="font-mono tabular-nums">{data.targetDays}d</span>
+          <p className="text-muted">
+            Configurable target: <span className="font-mono tabular-nums text-ink">{data.targetDays}d</span>
           </p>
-          <p className="text-slate-500">
-            Active Cases: <span className="font-mono tabular-nums">{data.caseCount}</span>
+          <p className="text-muted">
+            Active caseload: <span className="font-mono tabular-nums text-ink">{data.caseCount}</span>
           </p>
         </div>
       );
@@ -67,133 +89,123 @@ export default function Dashboard() {
     return null;
   };
 
-  const CustomWorkloadTooltip = ({ active, payload, label }) => {
+  const CustomWorkloadTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
+      const data = payload[0].payload;
       return (
-        <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-md border border-slate-200/80 text-xs space-y-1">
-          <p className="font-semibold text-slate-900">{label}</p>
-          {payload.map((item, idx) => (
-            <p key={idx} style={{ color: item.color }} className="font-medium">
-              {item.name}: <span className="font-mono tabular-nums font-bold">{item.value}</span>
+        <div className="bg-surface p-3 rounded-[4px] border border-rule text-xs space-y-1 shadow-sm">
+          <p className="font-semibold text-ink">{data.courtroom}</p>
+          <p className="text-muted">
+            Cumulative complexity: <span className="font-mono tabular-nums font-semibold text-ink">{data.totalComplexity} pts</span>
+          </p>
+          <p className="text-muted">
+            Active matters: <span className="font-mono tabular-nums text-ink">{data.activeCases}</span>
+          </p>
+          {data.judgeNames?.length > 0 && (
+            <p className="text-[11px] text-muted">
+              Bench: {data.judgeNames.join(", ")}
             </p>
-          ))}
+          )}
         </div>
       );
     }
     return null;
-  };
-
-  const getActionBadgeClass = (action) => {
-    switch (action) {
-      case "CASE_REGISTERED":
-        return "bg-blue-50 text-blue-700 ring-blue-600/20";
-      case "TRACK_APPROVED":
-        return "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-      case "TRACK_OVERRIDDEN":
-        return "bg-purple-50 text-purple-700 ring-purple-600/20";
-      case "CAUSE_LIST_GENERATED":
-        return "bg-amber-50 text-amber-700 ring-amber-600/20";
-      case "OUTCOME_RECORDED":
-        return "bg-slate-50 text-slate-700 ring-slate-600/20";
-      default:
-        return "bg-slate-50 text-slate-700 ring-slate-600/20";
-    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Editorial Page Header */}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 pb-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-              Welcome back, {user?.name}
+            <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
+              Court registry dashboard
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Active Session: <span className="font-semibold text-slate-700">{user?.role}</span>
-              {user?.judge && (
-                <span className="tabular-nums">
-                  {" "}• Assigned to {user.judge.courtroom} (Capacity: {user.judge.dailyCapacity})
-                </span>
-              )}
+            <p className="text-xs sm:text-sm text-muted mt-1">
+              Caseload distribution, track compliance, and courtroom allocation metrics.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              System Online
-            </span>
+          <div className="text-xs font-mono tabular-nums text-muted self-start sm:self-auto">
+            As of {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} (IST)
           </div>
         </div>
+        <div className="rule-double"></div>
       </div>
 
-      {/* Caseload Performance Metrics Cards */}
-      <div>
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-3">
-          Judicial Caseload Overview
-        </h2>
+      {/* Caseload Figures Strip */}
+      <section aria-label="Caseload figures">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-caps text-[11px] text-muted">
+            Caseload overview
+          </h2>
+          <span className="text-[11px] font-mono tabular-nums text-muted">
+            Aggregated across all tracks
+          </span>
+        </div>
         <DashboardMetrics />
-      </div>
+      </section>
 
-      {/* Recharts Data Visualizations */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Main Chart: Average Case Age by Track */}
-        <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] flex flex-col justify-between">
+      {/* Visualizations Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Main Chart: Case Age by Track */}
+        <section
+          aria-label="Average case age by track"
+          className="bg-surface border border-rule rounded-[4px] p-5 flex flex-col justify-between"
+        >
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-semibold tracking-tight text-slate-900">
-                Average Case Age by Track
+            <div className="flex items-baseline justify-between mb-1">
+              <h3 className="text-sm font-semibold text-ink font-serif">
+                Average case age by track
               </h3>
-              <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                Statutory Tracking
+              <span className="font-mono text-[11px] text-muted">
+                Mean days elapsed
               </span>
             </div>
-            <p className="text-xs text-slate-500 mb-4">
-              Mean days elapsed since filing across FAST (90d), STANDARD (365d), and COMPLEX (730d) tracks.
+            <p className="text-xs text-muted mb-4">
+              Track targets (configurable): FAST 90d, STANDARD 365d, COMPLEX 730d.
             </p>
           </div>
 
           <div className="h-64 w-full">
             {loading ? (
-              <div className="h-full flex flex-col items-center justify-center gap-2 text-xs text-slate-400 bg-slate-50/50 rounded-lg border border-dashed border-slate-200 animate-pulse">
-                <span className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
-                <span>Loading statutory track distribution...</span>
+              <div className="h-full flex items-center justify-center text-xs text-muted font-mono animate-pulse">
+                Loading track distribution...
               </div>
             ) : error ? (
-              <div className="h-full flex items-center justify-center text-xs text-rose-500">
-                Failed to load visualization data.
+              <div className="h-full flex items-center justify-center text-xs text-oxblood">
+                {error}
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={analytics?.trackDistribution || []}
-                  margin={{ top: 15, right: 20, left: -10, bottom: 5 }}
+                  margin={{ top: 15, right: 15, left: -15, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#DAD5C8" />
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                    axisLine={{ stroke: "#E2E8F0" }}
+                    tick={{ fontSize: 11, fill: "#5C6470", fontFamily: "IBM Plex Sans" }}
+                    axisLine={{ stroke: "#DAD5C8" }}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                    axisLine={{ stroke: "#E2E8F0" }}
+                    tick={{ fontSize: 11, fill: "#5C6470", fontFamily: "IBM Plex Mono" }}
+                    axisLine={{ stroke: "#DAD5C8" }}
                     tickLine={false}
-                    unit=" d"
+                    unit="d"
                     className="tabular-nums"
                   />
-                  <Tooltip content={<CustomAgeTooltip />} />
+                  <Tooltip content={<CustomAgeTooltip />} cursor={{ fill: "rgba(31,58,95,0.04)" }} />
                   <Bar
                     dataKey="averageAge"
-                    name="Average Case Age (days)"
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={48}
+                    name="Average age (days)"
+                    radius={[2, 2, 0, 0]}
+                    maxBarSize={44}
                   >
                     {(analytics?.trackDistribution || []).map((entry) => (
                       <Cell
                         key={`cell-${entry.name}`}
-                        fill={TRACK_COLORS[entry.name] || "#3B82F6"}
+                        fill={TRACK_NAVY_TINTS[entry.name] || "#1F3A5F"}
                       />
                     ))}
                   </Bar>
@@ -202,143 +214,134 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-around text-xs text-slate-600">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              <span className="tabular-nums">FAST (90d max)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span className="tabular-nums">STANDARD (365d max)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-              <span className="tabular-nums">COMPLEX (730d max)</span>
-            </div>
+          <div className="pt-3 mt-3 border-t border-rule flex items-center justify-between text-[11px] text-muted font-mono tabular-nums">
+            <span>FAST: 90d max</span>
+            <span>STANDARD: 365d max</span>
+            <span>COMPLEX: 730d max</span>
           </div>
-        </div>
+        </section>
 
-        {/* Secondary Chart: Judicial Courtroom Workload & Complexity */}
-        <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] flex flex-col justify-between">
+        {/* Secondary Chart: Workload by Courtroom */}
+        <section
+          aria-label="Workload by courtroom"
+          className="bg-surface border border-rule rounded-[4px] p-5 flex flex-col justify-between"
+        >
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-semibold tracking-tight text-slate-900">
-                Courtroom Active Workload
+            <div className="flex items-baseline justify-between mb-1">
+              <h3 className="text-sm font-semibold text-ink font-serif">
+                Workload by courtroom
               </h3>
-              <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20">
-                Greedy Balancing
+              <span className="font-mono text-[11px] text-muted">
+                Cumulative complexity
               </span>
             </div>
-            <p className="text-xs text-slate-500 mb-4">
-              Total active matters and cumulative complexity points assigned to each judicial bench.
+            <p className="text-xs text-muted mb-4">
+              Total cumulative complexity points across active cases (pending and listed).
             </p>
           </div>
 
           <div className="h-64 w-full">
             {loading ? (
-              <div className="h-full flex flex-col items-center justify-center gap-2 text-xs text-slate-400 bg-slate-50/50 rounded-lg border border-dashed border-slate-200 animate-pulse">
-                <span className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
-                <span>Loading courtroom workload metrics...</span>
+              <div className="h-full flex items-center justify-center text-xs text-muted font-mono animate-pulse">
+                Loading courtroom workload metrics...
               </div>
             ) : error ? (
-              <div className="h-full flex items-center justify-center text-xs text-rose-500">
-                Failed to load visualization data.
+              <div className="h-full flex items-center justify-center text-xs text-oxblood">
+                {error}
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={analytics?.judgeWorkloads || []}
-                  margin={{ top: 15, right: 20, left: -10, bottom: 5 }}
+                  data={aggregatedWorkloads}
+                  layout="vertical"
+                  margin={{ top: 10, right: 30, left: 15, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <CartesianGrid strokeDasharray="2 2" horizontal={false} stroke="#DAD5C8" />
                   <XAxis
-                    dataKey="courtroom"
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                    axisLine={{ stroke: "#E2E8F0" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                    axisLine={{ stroke: "#E2E8F0" }}
+                    type="number"
+                    tick={{ fontSize: 11, fill: "#5C6470", fontFamily: "IBM Plex Mono" }}
+                    axisLine={{ stroke: "#DAD5C8" }}
                     tickLine={false}
                     className="tabular-nums"
                   />
-                  <Tooltip content={<CustomWorkloadTooltip />} />
-                  <Legend
-                    wrapperStyle={{ fontSize: 11, paddingTop: 6 }}
-                    iconType="circle"
+                  <YAxis
+                    type="category"
+                    dataKey="courtroom"
+                    tick={{ fontSize: 11, fill: "#1C2230", fontFamily: "IBM Plex Sans" }}
+                    axisLine={{ stroke: "#DAD5C8" }}
+                    tickLine={false}
+                    width={100}
                   />
-                  <Bar
-                    dataKey="activeCases"
-                    name="Active Cases"
-                    fill="#3B82F6"
-                    radius={[3, 3, 0, 0]}
-                    maxBarSize={28}
-                  />
+                  <Tooltip content={<CustomWorkloadTooltip />} cursor={{ fill: "rgba(31,58,95,0.04)" }} />
                   <Bar
                     dataKey="totalComplexity"
-                    name="Cumulative Complexity"
-                    fill="#F59E0B"
-                    radius={[3, 3, 0, 0]}
-                    maxBarSize={28}
+                    name="Cumulative complexity points"
+                    fill="#1F3A5F"
+                    radius={[0, 2, 2, 0]}
+                    maxBarSize={22}
                   />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 text-xs text-slate-500 text-center">
-            Greedy load balancing prevents complex litigation from bottlenecking a single courtroom.
+          <div className="pt-3 mt-3 border-t border-rule text-[11px] text-muted">
+            Greedy load balancing distributes filed matters by complexity to prevent courtroom backlogs.
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* Recent Judicial Activity Log Feed */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] space-y-4">
-        <div className="flex items-center justify-between">
+      {/* Recent Registry Activity */}
+      <section
+        aria-label="Recent registry activity"
+        className="bg-surface border border-rule rounded-[4px] p-5 space-y-4"
+      >
+        <div className="flex items-baseline justify-between border-b border-rule pb-3">
           <div>
-            <h3 className="text-sm font-semibold tracking-tight text-slate-900">Recent Registry Activity</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live audit stream of intake, classification approvals, listings, and hearing decrees.
+            <h3 className="text-sm font-semibold text-ink font-serif">
+              Recent registry activity
+            </h3>
+            <p className="text-xs text-muted mt-0.5">
+              Intake, track assignments, cause list generation, and hearing proceedings.
             </p>
           </div>
           {user?.role === "JUDGE" && (
             <Link
               to="/audit-log"
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+              className="text-xs font-mono text-accent hover:underline"
             >
-              View Full Audit Log →
+              Full audit log &rarr;
             </Link>
           )}
         </div>
 
         {loading ? (
-          <div className="space-y-2 py-4 animate-pulse">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-8 bg-slate-100 rounded-lg"></div>
+          <div className="space-y-2 py-2 animate-pulse">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-7 bg-rule/30 rounded-[2px]"></div>
             ))}
           </div>
         ) : !analytics?.recentActivity || analytics.recentActivity.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl">
-            <p className="text-xs">No recent judicial activity recorded.</p>
+          <div className="py-8 text-center text-xs text-muted font-mono">
+            No recent registry activity recorded.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 text-xs">
+          <div className="divide-y divide-rule text-xs">
             {analytics.recentActivity.map((log) => (
               <div
                 key={log.id}
-                className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 transition-colors duration-150 hover:bg-slate-50/70 rounded px-1"
+                className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 transition-colors duration-100 hover:bg-paper/40"
               >
                 <div className="flex items-center gap-2.5">
                   <StatusBadge status={log.action} />
-                  <span className="font-semibold text-slate-800 font-mono tabular-nums">
+                  <span className="font-semibold text-ink font-mono tabular-nums">
                     {log.case?.caseNumber || "Registry Event"}
                   </span>
-                  <span className="text-slate-400 text-[11px]">
+                  <span className="text-muted text-[11px]">
                     by {log.user?.name || "System"} ({log.user?.role})
                   </span>
                 </div>
-                <span className="text-slate-400 text-[11px] font-mono tabular-nums">
+                <span className="text-muted text-[11px] font-mono tabular-nums">
                   {new Date(log.createdAt).toLocaleTimeString("en-IN", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -349,7 +352,7 @@ export default function Dashboard() {
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
