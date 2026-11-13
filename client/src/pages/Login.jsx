@@ -143,7 +143,7 @@ export default function Login() {
                 className="text-left p-2.5 rounded-lg bg-emerald-50/70 hover:bg-emerald-100/70 ring-1 ring-inset ring-emerald-500/20 text-emerald-900 transition active:scale-[0.98]"
               >
                 <div className="font-medium">Advocate Rohit</div>
-                <div className="text-[10px] text-emerald-700/80 font-mono">rohit.lawyer@court...</div>
+                <div className="text-[10px] text-emerald-700/80 font-mono">rohit.lawyer@court.gov.in</div>
               </button>
             </div>
           </div>
