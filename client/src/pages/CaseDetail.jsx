@@ -99,21 +99,30 @@ export default function CaseDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16 text-center text-slate-500">
-        <div className="h-8 w-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-        <p className="text-sm font-medium">Retrieving court dossier...</p>
+      <div className="max-w-5xl mx-auto px-4 py-12 space-y-4">
+        <div className="h-4 bg-slate-200/70 rounded w-28 animate-pulse"></div>
+        <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] animate-pulse space-y-4">
+          <div className="h-6 bg-slate-200/70 rounded w-1/3"></div>
+          <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+          <div className="grid grid-cols-4 gap-3 pt-2">
+            <div className="h-14 bg-slate-100 rounded-lg"></div>
+            <div className="h-14 bg-slate-100 rounded-lg"></div>
+            <div className="h-14 bg-slate-100 rounded-lg"></div>
+            <div className="h-14 bg-slate-100 rounded-lg"></div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !caseData) {
     return (
-      <div className="max-w-md mx-auto my-16 p-6 bg-rose-50 border border-rose-200 rounded-xl text-center">
-        <h2 className="text-lg font-bold text-rose-800">Case Not Found</h2>
+      <div className="max-w-md mx-auto my-16 p-6 bg-rose-50/70 border border-rose-200/80 rounded-xl text-center shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+        <h2 className="text-base font-semibold text-rose-900">Case Not Found</h2>
         <p className="text-xs text-rose-600 mt-1">{error || "Unable to locate matter."}</p>
         <Link
           to="/cases"
-          className="mt-4 inline-block px-4 py-2 bg-slate-800 text-white rounded-lg text-xs font-semibold"
+          className="mt-4 inline-block px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium shadow-sm transition active:scale-[0.98]"
         >
           ← Return to Case Registry
         </Link>
@@ -121,54 +130,63 @@ export default function CaseDetail() {
     );
   }
 
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20";
+      case "LISTED":
+        return "bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20";
+      case "DISPOSED":
+        return "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20";
+      default:
+        return "bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/20";
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Back Link */}
       <div>
-        <Link to="/cases" className="text-xs font-semibold text-blue-600 hover:text-blue-800">
+        <Link to="/cases" className="text-xs font-medium text-blue-600 hover:text-blue-700 transition">
           ← Back to Master Registry
         </Link>
       </div>
 
       {/* Case Header Card */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
           <div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="font-mono text-xl font-bold text-blue-700">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-lg sm:text-xl font-bold text-blue-700 tabular-nums">
                 {caseData.caseNumber}
               </span>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  caseData.status === "PENDING"
-                    ? "bg-blue-100 text-blue-800"
-                    : caseData.status === "LISTED"
-                    ? "bg-purple-100 text-purple-800"
-                    : "bg-slate-200 text-slate-800"
-                }`}
+                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium uppercase font-mono ${getStatusBadge(
+                  caseData.status
+                )}`}
               >
                 {caseData.status}
               </span>
               {caseData.isUrgent && (
-                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                  🚨 Urgent Matter
+                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
+                  Urgent
                 </span>
               )}
               {caseData.isOverdue && (
-                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
-                  🚨 Overdue Target
+                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
+                  Overdue
                 </span>
               )}
               {caseData.isAging && (
-                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                  ⏳ Aging (&gt;5y)
+                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                  Aging (&gt;5y)
                 </span>
               )}
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300">
+              <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-mono font-semibold tabular-nums bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/20">
                 ⚡ Priority: {Number(caseData.priorityScore || 0).toFixed(1)}
               </span>
             </div>
-            <h1 className="text-lg font-bold text-slate-900 mt-1">{caseData.title}</h1>
+            <h1 className="text-base sm:text-lg font-semibold tracking-tight text-slate-900 mt-1.5">{caseData.title}</h1>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 font-mono mt-0.5">
               <span>Case Type: {caseData.caseType}</span>
               <span>•</span>
@@ -178,33 +196,33 @@ export default function CaseDetail() {
             </div>
           </div>
           <div className="text-left md:text-right text-xs text-slate-500 space-y-1">
-            <div>Filing Date: <strong className="text-slate-700 font-mono">{caseData.filingDate}</strong></div>
-            <div>Target Disposal: <strong className="text-slate-700 font-mono">{caseData.targetDisposalDate}</strong></div>
-            <div>Earliest Listing: <strong className="text-slate-700 font-mono">{caseData.earliestNextDate}</strong></div>
+            <div>Filing Date: <strong className="text-slate-700 font-mono tabular-nums">{caseData.filingDate}</strong></div>
+            <div>Target Disposal: <strong className="text-slate-700 font-mono tabular-nums">{caseData.targetDisposalDate}</strong></div>
+            <div>Earliest Listing: <strong className="text-slate-700 font-mono tabular-nums">{caseData.earliestNextDate}</strong></div>
           </div>
         </div>
 
         {/* Quick Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-            <span className="text-slate-400 uppercase text-[10px] block font-bold">Complexity</span>
-            <span className="font-bold text-slate-800 text-base">{caseData.complexity} pts</span>
+          <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
+            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Complexity</span>
+            <span className="font-bold text-slate-800 text-sm sm:text-base tabular-nums">{caseData.complexity} pts</span>
           </div>
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-            <span className="text-slate-400 uppercase text-[10px] block font-bold">Active Track</span>
-            <span className="font-bold text-blue-700 text-base">
+          <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
+            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Active Track</span>
+            <span className="font-bold text-blue-700 text-sm sm:text-base tabular-nums">
               {caseData.track?.name} ({caseData.track?.targetDays}d)
             </span>
           </div>
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-            <span className="text-slate-400 uppercase text-[10px] block font-bold">Recommended</span>
-            <span className="font-bold text-slate-700 text-base">
+          <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
+            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Recommended</span>
+            <span className="font-bold text-slate-700 text-sm sm:text-base">
               {caseData.suggestedTrack?.name}
             </span>
           </div>
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-            <span className="text-slate-400 uppercase text-[10px] block font-bold">Expert Evidence</span>
-            <span className="font-bold text-slate-700 text-base">
+          <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-100">
+            <span className="text-slate-500 uppercase text-[11px] block font-semibold">Expert Evidence</span>
+            <span className="font-bold text-slate-700 text-sm sm:text-base">
               {caseData.hasExpertEvidence ? "Yes" : "No"}
             </span>
           </div>
@@ -213,34 +231,34 @@ export default function CaseDetail() {
 
       {/* Action Feedback Alerts */}
       {actionSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium">
+        <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs sm:text-sm font-medium">
           ✓ {actionSuccess}
         </div>
       )}
       {actionError && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm font-medium">
+        <div className="p-4 bg-rose-50/70 border border-rose-200/80 text-rose-800 rounded-xl text-xs sm:text-sm font-medium">
           ⚠️ {actionError}
         </div>
       )}
 
       {/* Track Review & Judicial Controls Card */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Judicial Track Classification
             </h2>
-            <p className="text-xs text-slate-500">
-              Human-in-the-loop judicial oversight: algorithms suggest, judicial officers decide.
+            <p className="text-xs text-slate-500 mt-0.5">
+              Human-in-the-loop oversight: algorithms suggest, judicial officers confirm.
             </p>
           </div>
           <div>
             {caseData.trackApproved ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                <span>✓</span> Approved by Judge {caseData.trackApprovedBy?.name || "Bench"}
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                <span>✓</span> Approved by {caseData.trackApprovedBy?.name || "Bench"}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20 animate-pulse">
                 <span>⚠️</span> Awaiting Judicial Review
               </span>
             )}
@@ -249,26 +267,26 @@ export default function CaseDetail() {
 
         {/* Override Note if present */}
         {caseData.trackOverrideReason && (
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
-            <span className="font-bold">Track Override Justification:</span>{" "}
+          <div className="p-3 bg-purple-50/60 border border-purple-200/70 rounded-lg text-xs text-purple-900">
+            <span className="font-semibold">Track Override Justification:</span>{" "}
             {caseData.trackOverrideReason}
           </div>
         )}
 
         {/* Judicial Action Controls (Judge Only) */}
         {user?.role === "JUDGE" && caseData.status !== "DISPOSED" && (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Bench Action Required (Judge Controls)
+          <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 space-y-3">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              Bench Judicial Controls
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5">
               {!caseData.trackApproved && (
                 <button
                   type="button"
                   disabled={submittingAction}
                   onClick={handleApprove}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition disabled:opacity-50"
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white rounded-lg text-xs font-medium shadow-sm transition disabled:opacity-50"
                 >
                   ✓ Approve Suggested Track ({caseData.suggestedTrack?.name})
                 </button>
@@ -277,7 +295,7 @@ export default function CaseDetail() {
               <button
                 type="button"
                 onClick={() => setShowOverrideBox(!showOverrideBox)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold shadow-sm transition"
+                className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white rounded-lg text-xs font-medium shadow-sm transition"
               >
                 {showOverrideBox ? "Cancel Override" : "⚖️ Override Track Assignment"}
               </button>
@@ -285,55 +303,52 @@ export default function CaseDetail() {
 
             {/* Override Form */}
             {showOverrideBox && (
-              <form onSubmit={handleOverride} className="mt-4 pt-4 border-t border-slate-200 space-y-3">
+              <form onSubmit={handleOverride} className="mt-4 pt-4 border-t border-slate-200/80 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
                       Target Judicial Track *
                     </label>
                     <select
                       required
                       value={overrideTrackId}
                       onChange={(e) => setOverrideTrackId(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
                     >
                       <option value="">Select Alternative Track...</option>
-                      {tracks
-                        .filter((t) => t.id !== caseData.trackId)
-                        .map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.name} Track ({t.targetDays} Days Target)
-                          </option>
-                        ))}
+                      {tracks.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} Track ({t.targetDays} Days Target, {t.gapDays}d Cooling Gap)
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Documented Reason (Min 10 characters) *
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Mandatory Judicial Rationale (min 10 chars) *
                     </label>
-                    <textarea
+                    <input
+                      type="text"
                       required
                       minLength={10}
-                      rows={2}
+                      placeholder="e.g., Matter involves consolidated multi-state appeals"
                       value={overrideReason}
                       onChange={(e) => setOverrideReason(e.target.value)}
-                      placeholder="e.g., Matter narrowed by joint memo; witness count reduced."
-                      className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
                     />
-                    <span className="text-[10px] text-slate-400">
-                      {overrideReason.length}/10 characters minimum
-                    </span>
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={submittingAction || overrideReason.trim().length < 10 || !overrideTrackId}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-sm transition disabled:opacity-40"
-                >
-                  {submittingAction ? "Recording Override..." : "Submit Judicial Override"}
-                </button>
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    disabled={submittingAction}
+                    className="px-4 py-2 bg-purple-700 hover:bg-purple-800 active:scale-[0.99] text-white rounded-lg text-xs font-medium shadow-sm transition disabled:opacity-50"
+                  >
+                    {submittingAction ? "Recording Override..." : "Confirm Judicial Override"}
+                  </button>
+                </div>
               </form>
             )}
           </div>
@@ -341,21 +356,21 @@ export default function CaseDetail() {
       </div>
 
       {/* Litigants & Advocates Card */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] space-y-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           Attached Litigants & Advocates ({caseData.parties?.length || 0})
         </h2>
         <div className="divide-y divide-slate-100 text-xs">
           {caseData.parties?.map((p) => (
             <div key={p.id} className="py-2.5 flex items-center justify-between">
-              <span className="font-semibold text-slate-800">{p.name}</span>
+              <span className="font-medium text-slate-800">{p.name}</span>
               <span
-                className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] ${
+                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono font-medium ring-1 ring-inset ${
                   p.role === "PETITIONER"
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    ? "bg-blue-50 text-blue-700 ring-blue-600/20"
                     : p.role === "RESPONDENT"
-                    ? "bg-rose-50 text-rose-700 border border-rose-200"
-                    : "bg-slate-100 text-slate-700 border border-slate-200"
+                    ? "bg-rose-50 text-rose-700 ring-rose-600/20"
+                    : "bg-slate-50 text-slate-700 ring-slate-600/20"
                 }`}
               >
                 {p.role}
@@ -365,28 +380,28 @@ export default function CaseDetail() {
         </div>
       </div>
 
-      {/* Hearing History — richer timeline with outcome, remarks, next date */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+      {/* Hearing Schedule & Proceedings */}
+      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] space-y-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           Hearing Schedule & Proceedings
         </h2>
         {(!caseData.hearings || caseData.hearings.length === 0) ? (
-          <p className="text-xs text-slate-500 italic py-2">
+          <p className="text-xs text-slate-400 italic py-2">
             No court hearings scheduled yet. Matter will appear upon daily cause list generation.
           </p>
         ) : (
           <div className="divide-y divide-slate-100">
             {caseData.hearings.map((h) => {
               const outcomeBadge =
-                h.outcome === "HEARD"     ? "bg-emerald-100 text-emerald-800" :
-                h.outcome === "ADJOURNED" ? "bg-amber-100 text-amber-800" :
-                h.outcome === "DISPOSED"  ? "bg-slate-200 text-slate-700" :
-                                            "bg-blue-100 text-blue-800";
+                h.outcome === "HEARD"     ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" :
+                h.outcome === "ADJOURNED" ? "bg-amber-50 text-amber-700 ring-amber-600/20" :
+                h.outcome === "DISPOSED"  ? "bg-slate-50 text-slate-700 ring-slate-600/20" :
+                                            "bg-blue-50 text-blue-700 ring-blue-600/20";
               return (
                 <div key={h.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono font-semibold text-slate-700">{h.hearingDate}</span>
-                    <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[11px] ${outcomeBadge}`}>
+                    <span className="font-mono font-medium text-slate-700 tabular-nums">{h.hearingDate}</span>
+                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase font-mono ring-1 ring-inset ${outcomeBadge}`}>
                       {h.outcome}
                     </span>
                     {h.remarks && (
@@ -407,28 +422,28 @@ export default function CaseDetail() {
         )}
         {/* Next eligible listing date */}
         {caseData.status === "PENDING" && caseData.earliestNextDate && (
-          <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800">
-            <span className="font-bold">Earliest Next Listing: </span>
-            <span className="font-mono">{caseData.earliestNextDate}</span>
+          <div className="mt-2 p-3 bg-blue-50/50 border border-blue-100/70 rounded-lg text-xs text-blue-800">
+            <span className="font-semibold">Earliest Next Listing: </span>
+            <span className="font-mono tabular-nums font-bold">{caseData.earliestNextDate}</span>
             <span className="text-blue-600 ml-2">(statutory cooling gap enforced)</span>
           </div>
         )}
       </div>
 
       {/* Audit Log Timeline */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] space-y-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           Case Event Audit Trail
         </h2>
         <div className="divide-y divide-slate-100 text-xs">
           {caseData.auditLogs?.map((log) => (
             <div key={log.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
               <div>
-                <span className="font-mono font-bold text-slate-800">{log.action}</span>
+                <span className="font-mono font-medium text-slate-800">{log.action}</span>
                 <span className="text-slate-400 text-[11px] ml-2">by {log.user?.name || "System"}</span>
                 <p className="text-[11px] text-slate-500 font-mono mt-0.5">{log.details}</p>
               </div>
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">
+              <span className="text-[10px] text-slate-400 whitespace-nowrap font-mono tabular-nums">
                 {new Date(log.createdAt).toLocaleString("en-IN")}
               </span>
             </div>
@@ -438,4 +453,3 @@ export default function CaseDetail() {
     </div>
   );
 }
-

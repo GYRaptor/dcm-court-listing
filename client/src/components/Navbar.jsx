@@ -12,31 +12,31 @@ export default function Navbar() {
   };
 
   const navLinkClass = ({ isActive }) =>
-    `px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+    `px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition whitespace-nowrap ${
       isActive
-        ? "bg-blue-700 text-white shadow-sm"
-        : "text-slate-200 hover:bg-slate-800 hover:text-white"
+        ? "bg-slate-800 text-white shadow-sm ring-1 ring-inset ring-slate-700/80"
+        : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
     }`;
 
-  // Role badge color helper
+  // Role badge color helper with subtle inset rings
   const roleBadgeColor = {
-    CLERK: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    JUDGE: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-    LAWYER: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-  }[user?.role] || "bg-slate-700 text-slate-300";
+    CLERK: "bg-amber-500/10 text-amber-300 ring-1 ring-inset ring-amber-500/30",
+    JUDGE: "bg-purple-500/10 text-purple-300 ring-1 ring-inset ring-purple-500/30",
+    LAWYER: "bg-emerald-500/10 text-emerald-300 ring-1 ring-inset ring-emerald-500/30",
+  }[user?.role] || "bg-slate-800 text-slate-300 ring-1 ring-inset ring-slate-700";
 
   return (
-    <header className="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-50">
+    <header className="bg-slate-900 border-b border-slate-800/80 text-white sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo & Portal Name */}
         <div className="flex items-center gap-3">
           <Link to={user ? "/dashboard" : "/login"} className="flex items-center gap-2">
             <span className="text-xl">⚖️</span>
-            <span className="font-bold text-base sm:text-lg tracking-tight text-white">
+            <span className="font-semibold text-base sm:text-lg tracking-tight text-white">
               DCFM Portal
             </span>
           </Link>
-          <span className="hidden md:inline-block text-xs font-mono text-slate-400 border-l border-slate-700 pl-3">
+          <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-wider text-slate-400 border-l border-slate-800 pl-3">
             Ministry of Law & Justice
           </span>
         </div>
@@ -91,37 +91,37 @@ export default function Navbar() {
               )}
 
               {/* User Profile Pill & Logout */}
-              <div className="flex items-center gap-2 pl-3 ml-2 border-l border-slate-800">
+              <div className="flex items-center gap-2 pl-3 ml-2 border-l border-slate-800/80">
                 <div className="hidden sm:flex flex-col text-right">
-                  <span className="text-xs font-semibold text-slate-200">
+                  <span className="text-xs font-medium text-slate-200">
                     {user.name}
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 font-mono tabular-nums">
                     {user.judge ? user.judge.courtroom : user.email}
                   </span>
                 </div>
                 <span
-                  className={`text-[11px] font-mono px-2 py-0.5 rounded border uppercase font-bold ${roleBadgeColor}`}
+                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono uppercase font-semibold ${roleBadgeColor}`}
                 >
                   {user.role}
                 </span>
                 <button
                   onClick={handleLogout}
                   title="Sign out of DCFM Portal"
-                  className="text-xs px-2.5 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition font-medium"
+                  className="text-xs px-2.5 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition active:scale-[0.98]"
                 >
                   Logout
                 </button>
               </div>
             </>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <NavLink to="/login" className={navLinkClass}>
                 Sign In
               </NavLink>
               <NavLink
                 to="/register"
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-sm font-medium transition"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white rounded-lg text-xs sm:text-sm font-medium transition shadow-sm"
               >
                 Register as Advocate
               </NavLink>
@@ -132,4 +132,3 @@ export default function Navbar() {
     </header>
   );
 }
-
