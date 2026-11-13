@@ -123,17 +123,17 @@ export default function AuditLog() {
             <table className="w-full text-left text-xs">
               <thead className="bg-paper text-muted font-caps text-[11px] border-b border-rule">
                 <tr>
-                  <th className="py-2.5 px-3.5 w-44">Timestamp</th>
-                  <th className="py-2.5 px-3.5 w-44">Action</th>
-                  <th className="py-2.5 px-3.5 w-40">Initiator</th>
-                  <th className="py-2.5 px-3.5 w-44">Target Matter</th>
-                  <th className="py-2.5 px-3.5">Event Details</th>
+                  <th className="py-3.5 px-4 w-44">Timestamp</th>
+                  <th className="py-3.5 px-4 w-44">Action</th>
+                  <th className="py-3.5 px-4 w-40">Initiator</th>
+                  <th className="py-3.5 px-4 w-44">Target Matter</th>
+                  <th className="py-3.5 px-4">Event Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-rule text-ink">
                 {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-paper/40 transition-colors duration-100">
-                    <td className="py-2.5 px-3.5 font-mono text-muted whitespace-nowrap tabular-nums">
+                    <td className="py-3.5 px-4 font-mono text-muted whitespace-nowrap tabular-nums">
                       {new Date(log.createdAt).toLocaleString("en-IN", {
                         year: "numeric",
                         month: "short",
@@ -144,10 +144,10 @@ export default function AuditLog() {
                         hour12: true,
                       })}
                     </td>
-                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       <StatusBadge status={log.action} />
                     </td>
-                    <td className="py-2.5 px-3.5">
+                    <td className="py-3.5 px-4">
                       <div className="font-medium text-ink">
                         {log.user?.name || "System"}
                       </div>
@@ -155,7 +155,7 @@ export default function AuditLog() {
                         {log.user?.role}
                       </div>
                     </td>
-                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       {log.case ? (
                         <Link
                           to={`/cases/${log.case.id}`}
@@ -167,7 +167,7 @@ export default function AuditLog() {
                         <span className="text-muted font-mono text-xs">General / Bench</span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3.5">
+                    <td className="py-3.5 px-4">
                       {renderDetails(log.details)}
                     </td>
                   </tr>

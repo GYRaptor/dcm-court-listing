@@ -211,33 +211,33 @@ export default function Cases() {
               <table className="min-w-full divide-y divide-rule text-left text-xs">
                 <thead className="bg-paper text-muted font-caps text-[11px] border-b border-rule">
                   <tr>
-                    <th className="px-3.5 py-2.5 text-right w-20">Priority</th>
-                    <th className="px-3.5 py-2.5">Case Number</th>
-                    <th className="px-3.5 py-2.5">Cause Title & Type</th>
-                    <th className="px-3.5 py-2.5">Track</th>
-                    <th className="px-3.5 py-2.5">Review</th>
-                    <th className="px-3.5 py-2.5">Assigned Bench</th>
-                    <th className="px-3.5 py-2.5">Status</th>
-                    <th className="px-3.5 py-2.5 text-right">Action</th>
+                    <th className="py-3.5 px-4 text-right w-20">Priority</th>
+                    <th className="py-3.5 px-4">Case Number</th>
+                    <th className="py-3.5 px-4">Cause Title &amp; Type</th>
+                    <th className="py-3.5 px-4">Track</th>
+                    <th className="py-3.5 px-4">Review</th>
+                    <th className="py-3.5 px-4">Assigned Bench</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-rule text-ink">
                   {cases.map((c) => (
                     <tr key={c.id} className="hover:bg-paper/40 transition-colors duration-100">
                       {/* Priority Score */}
-                      <td className="px-3.5 py-2.5 whitespace-nowrap text-right font-mono tabular-nums">
+                      <td className="py-3.5 px-4 whitespace-nowrap text-right font-mono tabular-nums">
                         <span className={getPriorityScoreClass(Number(c.priorityScore))}>
                           {Number(c.priorityScore).toFixed(1)}
                         </span>
                       </td>
 
-                      <td className="px-3.5 py-2.5 font-mono whitespace-nowrap tabular-nums">
+                      <td className="py-3.5 px-4 font-mono whitespace-nowrap tabular-nums">
                         <Link to={`/cases/${c.id}`} className="text-accent hover:underline font-semibold">
                           {c.caseNumber}
                         </Link>
                       </td>
 
-                      <td className="px-3.5 py-2.5 max-w-xs">
+                      <td className="py-3.5 px-4 max-w-xs">
                         <div className="font-medium text-ink truncate" title={c.title}>
                           {c.title}
                         </div>
@@ -256,11 +256,11 @@ export default function Cases() {
                         </div>
                       </td>
 
-                      <td className="px-3.5 py-2.5 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <StatusBadge track={c.track?.name} />
                       </td>
 
-                      <td className="px-3.5 py-2.5 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         {c.trackApproved ? (
                           <span className="inline-flex items-center gap-1.5 text-xs text-ink font-mono">
                             <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
@@ -274,7 +274,7 @@ export default function Cases() {
                         )}
                       </td>
 
-                      <td className="px-3.5 py-2.5 whitespace-nowrap text-ink">
+                      <td className="py-3.5 px-4 whitespace-nowrap text-ink">
                         {c.judge ? (
                           <div>
                             <span className="font-semibold">{c.judge.courtroom}</span>
@@ -285,11 +285,11 @@ export default function Cases() {
                         )}
                       </td>
 
-                      <td className="px-3.5 py-2.5 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <StatusBadge status={c.status} />
                       </td>
 
-                      <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <Link
                           to={`/cases/${c.id}`}
                           className="font-mono text-xs text-accent hover:underline"

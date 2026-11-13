@@ -205,12 +205,12 @@ export default function CauseList() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-paper text-muted font-caps text-[11px] border-b border-rule">
                   <tr>
-                    <th className="py-2.5 px-3.5 w-12 text-center">Item</th>
-                    <th className="py-2.5 px-3.5">Case Number</th>
-                    <th className="py-2.5 px-3.5">Title / Parties</th>
-                    <th className="py-2.5 px-3.5">Track</th>
-                    <th className="py-2.5 px-3.5 text-right">Priority</th>
-                    <th className="py-2.5 px-3.5 text-center">Status</th>
+                    <th className="py-3.5 px-4 w-12 text-center">Item</th>
+                    <th className="py-3.5 px-4">Case Number</th>
+                    <th className="py-3.5 px-4">Title / Parties</th>
+                    <th className="py-3.5 px-4">Track</th>
+                    <th className="py-3.5 px-4 text-right">Priority</th>
+                    <th className="py-3.5 px-4 text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-rule text-ink">
@@ -229,13 +229,13 @@ export default function CauseList() {
 
                     return (
                       <tr key={h.id} className="hover:bg-paper/40 transition-colors duration-100">
-                        <td className="py-2.5 px-3.5 text-center font-mono text-muted tabular-nums">
+                        <td className="py-3.5 px-4 text-center font-mono text-muted tabular-nums">
                           {index + 1}
                         </td>
-                        <td className="py-2.5 px-3.5 font-mono font-semibold text-accent tabular-nums">
+                        <td className="py-3.5 px-4 font-mono font-semibold text-accent tabular-nums">
                           {c?.caseNumber}
                         </td>
-                        <td className="py-2.5 px-3.5">
+                        <td className="py-3.5 px-4">
                           <div className="font-medium text-ink">
                             {c?.title}
                           </div>
@@ -243,13 +243,13 @@ export default function CauseList() {
                             {petitioners} <span className="text-muted/60">vs</span> {respondents}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3.5 whitespace-nowrap">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <StatusBadge track={c?.track?.name} />
                         </td>
-                        <td className="py-2.5 px-3.5 text-right font-mono tabular-nums">
+                        <td className="py-3.5 px-4 text-right font-mono tabular-nums">
                           {c?.priorityScore?.toFixed(1)}
                         </td>
-                        <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <StatusBadge outcome={h.outcome} />
                         </td>
                       </tr>
