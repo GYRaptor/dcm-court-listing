@@ -31,7 +31,7 @@ export default function App() {
       <AuthProvider>
         <div className="min-h-screen bg-paper text-ink flex flex-col font-sans antialiased">
           <Navbar />
-          <main className="flex-1 w-full pb-12">
+          <main className="flex-1 w-full pt-8 sm:pt-10 pb-16">
             <Routes>
               {/* Root route redirects appropriately */}
               <Route path="/" element={<HomeRedirect />} />
