@@ -1,14 +1,63 @@
 @import "tailwindcss";
 
+@theme {
+  --color-paper: #F6F3EC;
+  --color-surface: #FDFCF9;
+  --color-ink: #1C2230;
+  --color-muted: #5C6470;
+  --color-rule: #DAD5C8;
+  --color-accent: #1F3A5F;
+  --color-accent-hover: #152740;
+  --color-accent-light: #EBF0F6;
+  --color-accent-subtle: #D2DEEC;
+  --color-oxblood: #8A2E35;
+  --color-oxblood-light: #FBF0F1;
+  --color-ochre: #9A6B1F;
+  --color-ochre-light: #FDF6EC;
+
+  --color-navy-tint-1: #6B88AB;
+  --color-navy-tint-2: #3E6088;
+  --color-navy-tint-3: #1F3A5F;
+
+  --font-serif: "Source Serif 4", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
+}
+
 /* Base typography and subpixel rendering */
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background-color: #F6F3EC;
+  color: #1C2230;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #F6F3EC;
+  color: #1C2230;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
+/* Institutional small-caps utility (at least 12px) */
+.font-caps {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Strict tabular figures */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Editorial thin double rule */
+.rule-double {
+  border-top: 1px solid #DAD5C8;
+  border-bottom: 1px solid #DAD5C8;
+  height: 4px;
+}
