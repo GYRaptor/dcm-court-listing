@@ -146,6 +146,16 @@ export default function Login() {
                 <div className="text-[10px] text-emerald-700/80 font-mono">rohit.lawyer@court.gov.in</div>
               </button>
             </div>
+
+            <div className="mt-3 p-2.5 bg-slate-50 border border-slate-200/70 rounded-lg text-[11px] text-slate-500 space-y-1">
+              <div className="flex items-center justify-between">
+                <span>Shared Demo Password:</span>
+                <span className="font-mono font-semibold text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200">Demo@1234</span>
+              </div>
+              <div className="text-[10px] text-slate-400">
+                <strong>Clerk</strong> (filing & docketing) • <strong>Judge</strong> (bench hearings & cause lists) • <strong>Lawyer</strong> (case lookup)
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 text-center text-xs text-slate-500">

@@ -117,6 +117,11 @@ export default function App() {
               />
             </Routes>
           </main>
+          <footer className="py-4 border-t border-slate-200/80 bg-white/50 text-center text-xs text-slate-500">
+            <p>
+              DCFM Case Listing Portal • District Judiciary Case Flow Management
+            </p>
+          </footer>
         </div>
       </AuthProvider>
     </BrowserRouter>
