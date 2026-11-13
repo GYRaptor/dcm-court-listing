@@ -1,4 +1,4 @@
-# Differentiated Case Flow Management (DCFM) System
+# NyayaKram — Differentiated Case Flow Management (DCFM) System
 
 > **Ministry of Law and Justice — Problem Statement #147**  
 > An automated judicial case flow management and daily cause-list scheduling engine designed for Indian District Courts.
@@ -12,7 +12,7 @@ In traditional Indian district court registries, cases are predominantly listed 
 - **Unpredictable Cause Lists**: Court dockets regularly exceed judicial daily hearing capacities, forcing repeated adjournments, wasting advocate preparation time, and inflating pendency.
 - **Absence of Differentiated Disposal Benchmarks**: Matters lack statutory target timelines or mandatory cooling-off intervals between hearings.
 
-The **DCFM Platform** operationalizes the Supreme Court of India's *Model Case Flow Management Rules* by categorizing cases into objective tracks (**FAST**, **STANDARD**, **COMPLEX**), enforcing statutory cooling periods, balancing judge workloads based on cumulative complexity, and generating capacity-capped, priority-sorted daily cause lists.
+The **NyayaKram (DCFM) Platform** operationalizes the Supreme Court of India's *Model Case Flow Management Rules* by categorizing cases into objective tracks (**FAST**, **STANDARD**, **COMPLEX**), enforcing statutory cooling periods, balancing judge workloads based on cumulative complexity, and generating capacity-capped, priority-sorted daily cause lists.
 
 ### Judicial Roles & Access Control
 - **`CLERK` (Registry Officer)**: Intake and registration of cases, computation of initial complexity, litigant party entry, and institutional docket inspection.
