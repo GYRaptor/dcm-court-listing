@@ -12,13 +12,12 @@ export default function Navbar() {
   };
 
   const navLinkClass = ({ isActive }) =>
-    `px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+    `px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition whitespace-nowrap ${
       isActive
         ? "bg-slate-800 text-white shadow-sm ring-1 ring-inset ring-slate-700/80"
         : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
     }`;
 
-  // Role badge color helper with subtle inset rings
   const roleBadgeColor = {
     CLERK: "bg-amber-500/10 text-amber-300 ring-1 ring-inset ring-amber-500/30",
     JUDGE: "bg-purple-500/10 text-purple-300 ring-1 ring-inset ring-purple-500/30",
@@ -37,12 +36,12 @@ export default function Navbar() {
             </span>
           </Link>
           <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-wider text-slate-400 border-l border-slate-800 pl-3">
-            Ministry of Law & Justice
+            District Court System
           </span>
         </div>
 
         {/* Dynamic Navigation Links by Role */}
-        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto py-1 max-w-[calc(100vw-140px)] sm:max-w-none">
+        <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1 max-w-[calc(100vw-140px)] sm:max-w-none">
           {user ? (
             <>
               {/* CLERK Navigation */}
