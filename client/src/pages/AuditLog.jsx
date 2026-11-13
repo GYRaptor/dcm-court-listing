@@ -30,74 +30,62 @@ export default function AuditLog() {
     fetchLogs();
   }, [actionFilter]);
 
-  const getActionBadge = (action) => {
-    switch (action) {
-      case "CASE_REGISTERED":
-        return "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20";
-      case "TRACK_APPROVED":
-        return "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20";
-      case "TRACK_OVERRIDDEN":
-        return "bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20";
-      case "CAUSE_LIST_GENERATED":
-        return "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20";
-      case "OUTCOME_RECORDED":
-        return "bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/20";
-      default:
-        return "bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/20";
-    }
-  };
-
   const renderDetails = (details) => {
-    if (!details) return <span className="text-slate-400 italic">None</span>;
+    if (!details) return <span className="text-muted italic">None</span>;
     if (typeof details === "string") return <span>{details}</span>;
 
     return (
-      <div className="space-y-0.5 text-[11px] font-mono text-slate-600">
+      <div className="space-y-0.5 text-[11px] font-mono text-muted">
         {details.caseNumber && (
-          <div>Matter: <span className="font-semibold text-slate-800 tabular-nums">{details.caseNumber}</span></div>
+          <div>
+            Matter: <span className="font-semibold text-ink tabular-nums">{details.caseNumber}</span>
+          </div>
         )}
         {details.reason && (
-          <div className="text-purple-700 font-sans italic">Reason: "{details.reason}"</div>
+          <div className="text-ink font-sans italic">Reason: &ldquo;{details.reason}&rdquo;</div>
         )}
         {details.outcome && (
-          <div>Outcome: <span className="font-semibold text-slate-800">{details.outcome}</span></div>
+          <div>
+            Outcome: <span className="font-semibold text-ink">{details.outcome}</span>
+          </div>
         )}
         {details.nextEligibleDate && (
-          <div>Next Date: <span className="text-blue-600 font-semibold tabular-nums">{details.nextEligibleDate}</span></div>
+          <div>
+            Next Date: <span className="text-accent font-semibold tabular-nums">{details.nextEligibleDate}</span>
+          </div>
         )}
         {details.courtroom && (
-          <div>Courtroom: <span className="font-semibold text-slate-800">{details.courtroom}</span> ({details.casesListed} listed)</div>
+          <div>
+            Courtroom: <span className="font-semibold text-ink">{details.courtroom}</span> ({details.casesListed} listed)
+          </div>
         )}
       </div>
     );
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Page Header */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Editorial Page Header */}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 pb-3">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🔍</span>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                Judicial Event Audit Log
-              </h1>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Immutable chronological record of case intake, track modifications, listing events, and hearing outcomes.
+            <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
+              Judicial event audit log
+            </h1>
+            <p className="text-xs sm:text-sm text-muted mt-1">
+              Chronological ledger of case intake, track modifications, listings, and hearing outcomes.
             </p>
           </div>
 
           {/* Action Filter */}
-          <div className="flex items-center gap-2.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 whitespace-nowrap">
-              Filter Event:
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <label className="font-caps text-[11px] text-muted whitespace-nowrap">
+              Filter event:
             </label>
             <select
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
-              className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-medium transition"
+              className="px-2.5 py-1 text-xs font-sans border border-rule rounded-[3px] bg-paper text-ink focus:outline-none focus:border-accent"
             >
               <option value="ALL">All Actions ({total})</option>
               <option value="CASE_REGISTERED">CASE_REGISTERED</option>
@@ -108,46 +96,44 @@ export default function AuditLog() {
             </select>
           </div>
         </div>
+        <div className="rule-double"></div>
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50/70 border border-rose-200/80 text-rose-800 rounded-xl text-xs sm:text-sm">
+        <div className="p-3 bg-oxblood-light border border-oxblood/30 text-oxblood rounded-[4px] text-xs">
           {error}
         </div>
       )}
 
       {/* Audit Log Table */}
-      <div className="bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] overflow-hidden">
+      <div className="bg-surface border border-rule rounded-[4px] overflow-hidden">
         {loading ? (
-          <div className="p-10 text-center text-slate-400 space-y-3 animate-pulse">
-            <div className="h-4 bg-slate-200/70 rounded w-1/4 mx-auto"></div>
-            <div className="h-3 bg-slate-100 rounded w-1/2 mx-auto"></div>
-            <p className="text-xs">Loading immutable audit entries...</p>
+          <div className="p-10 text-center text-muted font-mono text-xs space-y-2 animate-pulse">
+            <div>Loading audit log records...</div>
           </div>
         ) : logs.length === 0 ? (
           <div className="p-6">
             <EmptyState
-              icon="📜"
-              title="No audit events match your filter"
+              title="No audit events found"
               description="Events will appear here as administrative and judicial actions occur."
             />
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-paper text-muted font-caps text-[11px] border-b border-rule">
                 <tr>
-                  <th className="py-3 px-4 w-44">Timestamp</th>
-                  <th className="py-3 px-4 w-44">Action</th>
-                  <th className="py-3 px-4 w-40">Initiator</th>
-                  <th className="py-3 px-4 w-44">Target Matter</th>
-                  <th className="py-3 px-4">Event Details</th>
+                  <th className="py-2.5 px-3.5 w-44">Timestamp</th>
+                  <th className="py-2.5 px-3.5 w-44">Action</th>
+                  <th className="py-2.5 px-3.5 w-40">Initiator</th>
+                  <th className="py-2.5 px-3.5 w-44">Target Matter</th>
+                  <th className="py-2.5 px-3.5">Event Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-rule text-ink">
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/70 transition-colors duration-150">
-                    <td className="py-3 px-4 text-xs font-mono text-slate-500 whitespace-nowrap tabular-nums">
+                  <tr key={log.id} className="hover:bg-paper/40 transition-colors duration-100">
+                    <td className="py-2.5 px-3.5 font-mono text-muted whitespace-nowrap tabular-nums">
                       {new Date(log.createdAt).toLocaleString("en-IN", {
                         year: "numeric",
                         month: "short",
@@ -158,30 +144,30 @@ export default function AuditLog() {
                         hour12: true,
                       })}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
                       <StatusBadge status={log.action} />
                     </td>
-                    <td className="py-3 px-4 text-xs">
-                      <div className="font-medium text-slate-800">
+                    <td className="py-2.5 px-3.5">
+                      <div className="font-medium text-ink">
                         {log.user?.name || "System"}
                       </div>
-                      <div className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+                      <div className="text-[10px] text-muted font-mono uppercase tracking-wider">
                         {log.user?.role}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-xs">
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
                       {log.case ? (
                         <Link
                           to={`/cases/${log.case.id}`}
-                          className="font-mono font-semibold text-blue-600 hover:text-blue-700 hover:underline tabular-nums"
+                          className="font-mono font-semibold text-accent hover:underline tabular-nums"
                         >
                           {log.case.caseNumber}
                         </Link>
                       ) : (
-                        <span className="text-slate-400 font-mono text-xs">General / Bench</span>
+                        <span className="text-muted font-mono text-xs">General / Bench</span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-2.5 px-3.5">
                       {renderDetails(log.details)}
                     </td>
                   </tr>
