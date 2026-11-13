@@ -41,7 +41,10 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <span className="text-3xl">⚖️</span>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="mt-2 text-lg font-bold tracking-tight text-slate-800">
+            NyayaKram
+          </h1>
+          <h2 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-900">
             Sign in to Court Registry
           </h2>
           <p className="mt-1 text-xs sm:text-sm text-slate-500">

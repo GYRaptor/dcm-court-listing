@@ -29,11 +29,16 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo & Portal Name */}
         <div className="flex items-center gap-3">
-          <Link to={user ? "/dashboard" : "/login"} className="flex items-center gap-2">
+          <Link to={user ? "/dashboard" : "/login"} className="flex items-center gap-2.5">
             <span className="text-xl">⚖️</span>
-            <span className="font-semibold text-base sm:text-lg tracking-tight text-white">
-              DCFM Portal
-            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="font-bold text-base sm:text-lg tracking-tight text-white">
+                NyayaKram
+              </span>
+              <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-slate-800 text-slate-300 ring-1 ring-inset ring-slate-700/80">
+                DCFM Portal
+              </span>
+            </div>
           </Link>
           <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-wider text-slate-400 border-l border-slate-800 pl-3">
             District Court System
