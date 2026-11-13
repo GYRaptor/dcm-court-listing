@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import api from "../api.js";
+import StatusBadge from "../components/StatusBadge.jsx";
 
 export default function Lookup() {
   const [searchNumber, setSearchNumber] = useState("");
@@ -120,17 +121,7 @@ export default function Lookup() {
                 <span className="font-mono text-lg font-bold text-blue-400 tabular-nums">
                   {caseData.caseNumber}
                 </span>
-                <span
-                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                    caseData.status === "PENDING"
-                      ? "bg-blue-500/10 text-blue-300 ring-blue-400/20"
-                      : caseData.status === "LISTED"
-                      ? "bg-purple-500/10 text-purple-300 ring-purple-400/20"
-                      : "bg-emerald-500/10 text-emerald-300 ring-emerald-400/20"
-                  }`}
-                >
-                  {caseData.status}
-                </span>
+                <StatusBadge status={caseData.status} />
                 {caseData.isOverdue && (
                   <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-rose-500/20 text-rose-300 ring-1 ring-inset ring-rose-500/30">
                     Overdue
@@ -146,16 +137,10 @@ export default function Lookup() {
               <p className="text-xs text-slate-400 font-mono mt-0.5">Matter Type: {caseData.caseType}</p>
             </div>
             <div className="sm:text-right">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
                 Assigned Track
               </span>
-              <span
-                className={`inline-flex items-center rounded-md mt-1 px-2.5 py-1 text-xs font-medium ${getTrackBadge(
-                  caseData.track?.name
-                )}`}
-              >
-                {caseData.track?.name} Track ({caseData.track?.targetDays}d target)
-              </span>
+              <StatusBadge track={caseData.track?.name} />
             </div>
           </div>
 
@@ -232,9 +217,7 @@ export default function Lookup() {
                     className="flex justify-between items-center p-2.5 rounded-lg bg-slate-50/70 text-xs border border-slate-100"
                   >
                     <span className="font-mono text-slate-700 tabular-nums">{h.hearingDate}</span>
-                    <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase font-mono bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-600/10">
-                      {h.outcome}
-                    </span>
+                    <StatusBadge outcome={h.outcome} />
                   </div>
                 ))}
               </div>

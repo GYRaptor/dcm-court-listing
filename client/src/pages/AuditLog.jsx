@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../api.js";
+import StatusBadge from "../components/StatusBadge.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 
 export default function AuditLog() {
   const [logs, setLogs] = useState([]);
@@ -123,10 +125,12 @@ export default function AuditLog() {
             <p className="text-xs">Loading immutable audit entries...</p>
           </div>
         ) : logs.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 space-y-2">
-            <span className="text-3xl">📜</span>
-            <p className="text-sm font-semibold text-slate-700">No audit events match your filter.</p>
-            <p className="text-xs text-slate-400">Events will appear here as administrative and judicial actions occur.</p>
+          <div className="p-6">
+            <EmptyState
+              icon="📜"
+              title="No audit events match your filter"
+              description="Events will appear here as administrative and judicial actions occur."
+            />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -155,13 +159,7 @@ export default function AuditLog() {
                       })}
                     </td>
                     <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono font-medium ring-1 ring-inset ${getActionBadge(
-                          log.action
-                        )}`}
-                      >
-                        {log.action}
-                      </span>
+                      <StatusBadge status={log.action} />
                     </td>
                     <td className="py-3 px-4 text-xs">
                       <div className="font-medium text-slate-800">
