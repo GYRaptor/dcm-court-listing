@@ -63,24 +63,6 @@ export default function MyHearings() {
     }
   };
 
-  const getTrackBadge = (trackName) => {
-    switch (trackName) {
-      case "FAST":    return "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20";
-      case "STANDARD": return "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20";
-      case "COMPLEX": return "bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20";
-      default:        return "bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/20";
-    }
-  };
-
-  const getOutcomePill = (outcome) => {
-    switch (outcome) {
-      case "HEARD":    return "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20";
-      case "ADJOURNED": return "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20";
-      case "DISPOSED": return "bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-600/10";
-      default:         return "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20";
-    }
-  };
-
   const pendingHearings = hearings.filter((h) => h.outcome === "SCHEDULED");
   const completedHearings = hearings.filter((h) => h.outcome !== "SCHEDULED");
 
@@ -88,10 +70,10 @@ export default function MyHearings() {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
         {[1, 2].map((i) => (
-          <div key={i} className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] animate-pulse space-y-3">
-            <div className="h-4 bg-slate-200/70 rounded w-1/3"></div>
-            <div className="h-3 bg-slate-100 rounded w-1/2"></div>
-            <div className="h-8 bg-slate-100 rounded w-full"></div>
+          <div key={i} className="bg-surface border border-rule rounded-[4px] p-6 animate-pulse space-y-3">
+            <div className="h-4 bg-rule/40 rounded w-1/3"></div>
+            <div className="h-3 bg-rule/30 rounded w-1/2"></div>
+            <div className="h-8 bg-rule/20 rounded w-full"></div>
           </div>
         ))}
       </div>
@@ -99,51 +81,55 @@ export default function MyHearings() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Header */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Editorial Page Header */}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 pb-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">⚖️ Judicial Bench — Today's Cause List</h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Listing Date: <span className="font-mono font-medium text-slate-700 tabular-nums">{date}</span>
+            <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
+              Judicial bench cause list
+            </h1>
+            <p className="text-xs sm:text-sm text-muted mt-1">
+              Listing date: <span className="font-mono tabular-nums font-semibold text-ink">{date}</span>
               {user?.judge && (
-                <> &nbsp;•&nbsp; Courtroom <span className="font-semibold text-slate-800">{user.judge.courtroom}</span></>
+                <> &bull; Courtroom <span className="font-semibold text-ink">{user.judge.courtroom}</span></>
               )}
             </p>
           </div>
           <button
             onClick={fetchHearings}
-            className="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+            className="px-3 py-1 border border-rule text-ink hover:bg-paper text-xs font-mono rounded-[3px] transition self-start sm:self-auto"
           >
-            ↻ Refresh
+            Refresh docket
           </button>
         </div>
+        <div className="rule-double"></div>
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50/70 border border-rose-200/80 text-rose-800 rounded-xl text-xs sm:text-sm">
+        <div className="p-3 bg-oxblood-light border border-oxblood/30 text-oxblood rounded-[4px] text-xs">
           {error}
         </div>
       )}
 
       {/* Empty state */}
       {!error && hearings.length === 0 && (
-        <div className="bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center text-slate-500 space-y-2">
-          <span className="text-3xl">📭</span>
-          <p className="font-semibold text-sm text-slate-700">No hearings listed for today.</p>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            Generate your daily cause list from the Cause List page to populate today's bench docket.
+        <div className="bg-surface border border-rule rounded-[4px] p-12 text-center text-muted space-y-2">
+          <p className="font-serif text-base text-ink">No hearings listed for today.</p>
+          <p className="text-xs text-muted max-w-sm mx-auto leading-relaxed">
+            Generate your daily cause list from the Cause List section to populate today's bench docket.
           </p>
         </div>
       )}
 
-      {/* Pending hearings — action required */}
+      {/* Pending hearings */}
       {pendingHearings.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Awaiting Outcome ({pendingHearings.length})
-          </h2>
+        <section aria-label="Awaiting hearing outcome" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-caps text-[11px] text-muted">
+              Awaiting outcome ({pendingHearings.length})
+            </h2>
+          </div>
           {pendingHearings.map((h, index) => {
             const c = h.case;
             const petitioners = c?.parties?.filter((p) => p.role === "PETITIONER").map((p) => p.name).join(", ");
@@ -151,39 +137,39 @@ export default function MyHearings() {
             const isSubmitting = submitting[h.id];
 
             return (
-              <div key={h.id} className="bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] overflow-hidden">
+              <div key={h.id} className="bg-surface border border-rule rounded-[4px] overflow-hidden">
                 {/* Case Header */}
-                <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-start gap-3 justify-between">
+                <div className="p-4 border-b border-rule flex flex-col sm:flex-row sm:items-start gap-3 justify-between bg-paper/50">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-semibold text-slate-400 tabular-nums">Item {index + 1}</span>
-                      <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded tabular-nums">
+                      <span className="text-xs font-mono text-muted tabular-nums">Item {index + 1}</span>
+                      <span className="font-mono text-xs font-semibold text-ink tabular-nums">
                         {c?.caseNumber}
                       </span>
                       <StatusBadge track={c?.track?.name} />
                       {c?.isUrgent && <StatusBadge urgency="Urgent" />}
                     </div>
-                    <p className="font-medium text-slate-900 text-sm">{c?.title}</p>
-                    <p className="text-xs text-slate-500">
-                      {petitioners} <span className="text-slate-400 mx-1">vs</span> {respondents}
+                    <p className="font-medium text-ink text-sm">{c?.title}</p>
+                    <p className="text-xs text-muted">
+                      {petitioners} <span className="text-muted/60 mx-1">vs</span> {respondents}
                     </p>
                   </div>
-                  <div className="flex flex-col items-start sm:items-end gap-1 shrink-0 text-xs text-slate-500">
-                    <span>Priority: <span className="font-mono font-semibold text-slate-800 tabular-nums">{c?.priorityScore?.toFixed(1)}</span></span>
-                    <span>Adjournments: <span className="font-semibold text-slate-700 tabular-nums">{c?.adjournmentCount}</span></span>
+                  <div className="flex flex-col items-start sm:items-end gap-1 shrink-0 text-xs font-mono tabular-nums text-muted">
+                    <span>Priority: <strong className="text-ink">{c?.priorityScore?.toFixed(1)}</strong></span>
+                    <span>Adjournments: <strong className="text-ink">{c?.adjournmentCount}</strong></span>
                     <Link
                       to={`/cases/${c?.id}`}
-                      className="text-blue-600 hover:text-blue-700 font-medium transition mt-1"
+                      className="text-accent hover:underline text-xs mt-1"
                     >
-                      View Full Dossier →
+                      Dossier &rarr;
                     </Link>
                   </div>
                 </div>
 
                 {/* Outcome Controls */}
-                <div className="p-5 bg-slate-50/50 space-y-3">
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    Bench Remarks (optional)
+                <div className="p-4 space-y-3">
+                  <label className="block font-caps text-[11px] text-muted">
+                    Bench remarks (optional)
                   </label>
                   <textarea
                     rows={2}
@@ -193,41 +179,41 @@ export default function MyHearings() {
                     onChange={(e) =>
                       setRemarkInputs((r) => ({ ...r, [h.id]: e.target.value }))
                     }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition resize-none shadow-sm"
+                    className="w-full px-3 py-2 border border-rule rounded-[3px] text-xs font-sans bg-paper text-ink focus:outline-none focus:border-accent resize-none"
                   />
 
                   <div className="flex flex-wrap gap-2">
                     <button
                       disabled={isSubmitting}
                       onClick={() => recordOutcome(h.id, "HEARD")}
-                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+                      className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-surface text-xs font-medium rounded-[3px] transition disabled:opacity-50"
                     >
-                      ✓ Mark HEARD
+                      Mark Heard
                     </button>
                     <button
                       disabled={isSubmitting}
                       onClick={() => recordOutcome(h.id, "ADJOURNED")}
-                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+                      className="px-3 py-1.5 border border-rule text-ink hover:bg-paper text-xs font-medium rounded-[3px] transition disabled:opacity-50"
                     >
-                      ↻ ADJOURN
+                      Adjourn
                     </button>
                     <button
                       disabled={isSubmitting}
                       onClick={() => recordOutcome(h.id, "DISPOSED")}
-                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+                      className="px-3 py-1.5 border border-oxblood/40 text-oxblood hover:bg-oxblood-light text-xs font-medium rounded-[3px] transition disabled:opacity-50"
                     >
-                      ✕ DISPOSE
+                      Dispose Matter
                     </button>
                   </div>
 
                   {errorMessages[h.id] && (
-                    <p className="text-xs text-rose-600 font-medium">{errorMessages[h.id]}</p>
+                    <p className="text-xs text-oxblood">{errorMessages[h.id]}</p>
                   )}
                   {successMessages[h.id] && (
-                    <p className="text-xs text-emerald-700 font-semibold">
+                    <p className="text-xs text-accent font-medium font-mono">
                       {successMessages[h.id]}
                       {nextDates[h.id] && (
-                        <> — Earliest Next Listing: <span className="font-mono tabular-nums">{nextDates[h.id]}</span></>
+                        <> &bull; Earliest next listing: <span className="tabular-nums font-semibold">{nextDates[h.id]}</span></>
                       )}
                     </p>
                   )}
@@ -238,27 +224,27 @@ export default function MyHearings() {
         </section>
       )}
 
-      {/* Completed hearings — read-only summary */}
+      {/* Completed hearings */}
       {completedHearings.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            Completed Today ({completedHearings.length})
+        <section aria-label="Hearings completed today" className="space-y-3">
+          <h2 className="font-caps text-[11px] text-muted">
+            Completed today ({completedHearings.length})
           </h2>
-          <div className="bg-white border border-slate-200/80 rounded-xl divide-y divide-slate-100 shadow-[0_1px_3px_rgba(15,23,42,0.04)] overflow-hidden">
+          <div className="bg-surface border border-rule rounded-[4px] divide-y divide-rule overflow-hidden">
             {completedHearings.map((h) => {
               const c = h.case;
               return (
-                <div key={h.id} className="px-5 py-3 flex items-center justify-between gap-4 hover:bg-slate-50/70 transition-colors duration-150">
+                <div key={h.id} className="px-4 py-2.5 flex items-center justify-between gap-4 hover:bg-paper/40 transition-colors duration-100">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="font-mono text-xs font-bold text-slate-700 tabular-nums shrink-0">
+                    <span className="font-mono text-xs font-semibold text-ink tabular-nums shrink-0">
                       {c?.caseNumber}
                     </span>
-                    <span className="text-xs sm:text-sm text-slate-700 truncate">{c?.title}</span>
+                    <span className="text-xs text-ink truncate">{c?.title}</span>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
                     {h.remarks && (
-                      <span className="text-xs text-slate-400 italic truncate max-w-[180px]" title={h.remarks}>
-                        "{h.remarks}"
+                      <span className="text-xs text-muted italic truncate max-w-[200px]" title={h.remarks}>
+                        &ldquo;{h.remarks}&rdquo;
                       </span>
                     )}
                     <StatusBadge outcome={h.outcome} />
