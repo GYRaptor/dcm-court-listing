@@ -109,9 +109,10 @@ export default function App() {
               <Route
                 path="*"
                 element={
-                  <div className="max-w-md mx-auto my-16 text-center">
-                    <h2 className="text-2xl font-bold text-slate-800">404 - Not Found</h2>
-                    <p className="text-sm text-slate-500 mt-2">The requested court page does not exist.</p>
+                  <div className="max-w-md mx-auto my-16 text-center space-y-2 p-6 bg-surface border border-rule rounded-[4px]">
+                    <h2 className="text-2xl font-serif text-ink">404 &mdash; Page Not Found</h2>
+                    <div className="rule-double max-w-[120px] mx-auto my-2"></div>
+                    <p className="text-xs text-muted">The requested judicial registry docket or page does not exist.</p>
                   </div>
                 }
               />
