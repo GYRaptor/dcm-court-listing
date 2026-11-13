@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting Day 1 database seeding...");
+  console.log("🌱 Starting DCFM database seeding...");
 
   // 1. Seed Tracks (FAST, STANDARD, COMPLEX)
   const tracks = [
@@ -25,12 +25,14 @@ async function main() {
     },
   ];
 
+  const trackMap = {};
   for (const trackData of tracks) {
     const track = await prisma.track.upsert({
       where: { name: trackData.name },
       update: trackData,
       create: trackData,
     });
+    trackMap[track.name] = track;
     console.log(`✓ Track ready: ${track.name} (target: ${track.targetDays}d, gap: ${track.gapDays}d)`);
   }
 
@@ -39,7 +41,7 @@ async function main() {
   const demoPassword = "Demo@1234";
   const passwordHash = await bcrypt.hash(demoPassword, saltRounds);
 
-  // 3. Seed Court Clerk
+  // 3. Seed Court Clerk (clerk@court.gov.in)
   const clerk = await prisma.user.upsert({
     where: { email: "clerk@court.gov.in" },
     update: {
@@ -56,13 +58,25 @@ async function main() {
   });
   console.log(`✓ Clerk ready: ${clerk.email}`);
 
-  // 4. Seed 3 Judges with different courtrooms and capacities
+  // 4. Seed Judges (saxena@court.gov.in, kumar@court.gov.in, etc.)
   const judgesData = [
+    {
+      name: "Justice Shalini Saxena",
+      email: "saxena@court.gov.in",
+      courtroom: "Courtroom 101",
+      dailyCapacity: 10,
+    },
     {
       name: "Justice Shalini Saxena",
       email: "judge.saxena@court.gov.in",
       courtroom: "Courtroom 101",
       dailyCapacity: 10,
+    },
+    {
+      name: "Justice Rajesh Kumar",
+      email: "kumar@court.gov.in",
+      courtroom: "Courtroom 102",
+      dailyCapacity: 8,
     },
     {
       name: "Justice Rajesh Kumar",
@@ -78,6 +92,7 @@ async function main() {
     },
   ];
 
+  const judgeMap = {};
   for (const jData of judgesData) {
     const judgeUser = await prisma.user.upsert({
       where: { email: jData.email },
@@ -105,14 +120,18 @@ async function main() {
         courtroom: jData.courtroom,
         dailyCapacity: jData.dailyCapacity,
       },
+      include: {
+        user: true,
+      },
     });
 
+    judgeMap[jData.email] = judgeProfile;
     console.log(
-      `✓ Judge ready: ${judgeUser.name} (${jData.courtroom}, capacity: ${judgeProfile.dailyCapacity})`
+      `✓ Judge ready: ${judgeUser.name} <${jData.email}> (${jData.courtroom}, capacity: ${judgeProfile.dailyCapacity})`
     );
   }
 
-  // 5. Seed Advocate / Lawyer
+  // 5. Seed Advocate / Lawyer (rohit.lawyer@court.gov.in)
   const lawyer = await prisma.user.upsert({
     where: { email: "rohit.lawyer@court.gov.in" },
     update: {
@@ -129,7 +148,7 @@ async function main() {
   });
   console.log(`✓ Lawyer ready: ${lawyer.email}`);
 
-  console.log("✅ Day 1 seeding completed successfully!");
+  console.log("✅ Users and tracks seeded successfully!");
 }
 
 main()
@@ -140,4 +159,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
