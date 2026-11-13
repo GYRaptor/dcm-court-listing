@@ -12,41 +12,40 @@ export default function Navbar() {
   };
 
   const navLinkClass = ({ isActive }) =>
-    `px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+    `px-2 sm:px-3 py-4 text-xs sm:text-sm font-medium transition whitespace-nowrap border-b-2 -mb-[1px] ${
       isActive
-        ? "bg-slate-800 text-white shadow-sm ring-1 ring-inset ring-slate-700/80"
-        : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
+        ? "border-accent text-accent font-semibold"
+        : "border-transparent text-muted hover:text-ink hover:border-rule"
     }`;
 
-  const roleBadgeColor = {
-    CLERK: "bg-amber-500/10 text-amber-300 ring-1 ring-inset ring-amber-500/30",
-    JUDGE: "bg-purple-500/10 text-purple-300 ring-1 ring-inset ring-purple-500/30",
-    LAWYER: "bg-emerald-500/10 text-emerald-300 ring-1 ring-inset ring-emerald-500/30",
-  }[user?.role] || "bg-slate-800 text-slate-300 ring-1 ring-inset ring-slate-700";
+  const formatUserDetails = () => {
+    if (!user) return "";
+    if (user.role === "JUDGE") {
+      return `${user.name}, Judge${user.judge?.courtroom ? `, ${user.judge.courtroom}` : ""}`;
+    }
+    if (user.role === "CLERK") {
+      return `${user.name}, Clerk`;
+    }
+    return `${user.name}, Advocate`;
+  };
 
   return (
-    <header className="bg-slate-900 border-b border-slate-800/80 text-white sticky top-0 z-50">
+    <header className="bg-paper border-b border-rule sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo & Portal Name */}
-        <div className="flex items-center gap-3">
-          <Link to={user ? "/dashboard" : "/login"} className="flex items-center gap-2.5">
-            <span className="text-xl">⚖️</span>
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold text-base sm:text-lg tracking-tight text-white">
-                NyayaKram
-              </span>
-              <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-slate-800 text-slate-300 ring-1 ring-inset ring-slate-700/80">
-                DCFM Portal
-              </span>
-            </div>
+        {/* Brand Wordmark */}
+        <div className="flex items-center gap-3 shrink-0">
+          <Link to={user ? "/dashboard" : "/login"} className="flex flex-col">
+            <span className="font-serif font-bold text-lg sm:text-xl tracking-tight text-ink leading-tight">
+              NyayaKram
+            </span>
+            <span className="font-mono text-[11px] text-muted tracking-wide">
+              District court listing
+            </span>
           </Link>
-          <span className="hidden md:inline-block text-[11px] font-mono uppercase tracking-wider text-slate-400 border-l border-slate-800 pl-3">
-            District Court System
-          </span>
         </div>
 
         {/* Dynamic Navigation Links by Role */}
-        <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1 max-w-[calc(100vw-140px)] sm:max-w-none">
+        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto h-full max-w-[calc(100vw-130px)] sm:max-w-none">
           {user ? (
             <>
               {/* CLERK Navigation */}
@@ -59,10 +58,10 @@ export default function Navbar() {
                     Cases
                   </NavLink>
                   <NavLink to="/cases/new" className={navLinkClass}>
-                    + New Case
+                    New case
                   </NavLink>
                   <NavLink to="/cause-list" className={navLinkClass}>
-                    Cause List
+                    Cause list
                   </NavLink>
                 </>
               )}
@@ -77,10 +76,10 @@ export default function Navbar() {
                     Cases
                   </NavLink>
                   <NavLink to="/hearings" className={navLinkClass}>
-                    My Hearings
+                    My hearings
                   </NavLink>
                   <NavLink to="/audit-log" className={navLinkClass}>
-                    Audit Log
+                    Audit log
                   </NavLink>
                 </>
               )}
@@ -89,45 +88,34 @@ export default function Navbar() {
               {user.role === "LAWYER" && (
                 <>
                   <NavLink to="/lookup" className={navLinkClass}>
-                    Case Lookup
+                    Case lookup
                   </NavLink>
                 </>
               )}
 
-              {/* User Profile Pill & Logout */}
-              <div className="flex items-center gap-2 pl-3 ml-2 border-l border-slate-800/80">
-                <div className="hidden sm:flex flex-col text-right">
-                  <span className="text-xs font-medium text-slate-200">
-                    {user.name}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono tabular-nums">
-                    {user.judge ? user.judge.courtroom : user.email}
-                  </span>
-                </div>
-                <span
-                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono uppercase font-semibold ${roleBadgeColor}`}
-                >
-                  {user.role}
+              {/* User Plaintext Info & Sign Out */}
+              <div className="flex items-center gap-3 pl-3 ml-2 border-l border-rule shrink-0">
+                <span className="hidden sm:inline text-xs text-muted max-w-[240px] truncate" title={formatUserDetails()}>
+                  {formatUserDetails()}
                 </span>
                 <button
                   onClick={handleLogout}
-                  title="Sign out of DCFM Portal"
-                  className="text-xs px-2.5 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition active:scale-[0.98]"
+                  className="text-xs text-accent hover:underline font-medium"
                 >
-                  Logout
+                  Sign out
                 </button>
               </div>
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <NavLink to="/login" className={navLinkClass}>
-                Sign In
+            <div className="flex items-center gap-3">
+              <NavLink to="/login" className="text-xs sm:text-sm text-ink hover:text-accent font-medium">
+                Sign in
               </NavLink>
               <NavLink
                 to="/register"
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white rounded-lg text-xs sm:text-sm font-medium transition shadow-sm"
+                className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-surface text-xs sm:text-sm font-medium rounded-[4px] transition"
               >
-                Register as Advocate
+                Register chamber
               </NavLink>
             </div>
           )}

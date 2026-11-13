@@ -1,21 +1,35 @@
 import React from "react";
 
 export default function EmptyState({
-  icon = "📂",
-  title = "No records found",
-  message = "No court matters match the current filter or search criteria.",
-  className = "",
+  title = "No records found.",
+  message = "",
+  description = "",
   action = null,
+  actionLabel = null,
+  onAction = null,
+  className = "",
 }) {
+  const displayMessage = description || message;
   return (
     <div
-      className={`p-10 text-center text-slate-500 border border-dashed border-slate-200/90 rounded-xl bg-slate-50/30 space-y-2 ${className}`}
+      className={`p-8 text-left border border-rule rounded-[4px] bg-surface text-ink space-y-2 ${className}`}
     >
-      <span className="text-3xl block">{icon}</span>
-      <p className="text-sm font-semibold text-slate-800">{title}</p>
-      {message && <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">{message}</p>}
-      {action && <div className="pt-2">{action}</div>}
+      <p className="text-sm font-medium text-ink">{title}</p>
+      {displayMessage && (
+        <p className="text-xs text-muted leading-relaxed">{displayMessage}</p>
+      )}
+      {(action || (actionLabel && onAction)) && (
+        <div className="pt-2">
+          {action || (
+            <button
+              onClick={onAction}
+              className="text-xs text-accent underline font-medium hover:text-accent-hover"
+            >
+              {actionLabel}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
-

@@ -29,9 +29,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans antialiased">
+        <div className="min-h-screen bg-paper text-ink flex flex-col font-sans antialiased">
           <Navbar />
-          <main className="flex-1 w-full pb-10">
+          <main className="flex-1 w-full pb-12">
             <Routes>
               {/* Root route redirects appropriately */}
               <Route path="/" element={<HomeRedirect />} />
@@ -117,7 +117,7 @@ export default function App() {
               />
             </Routes>
           </main>
-          <footer className="py-4 border-t border-slate-200/80 bg-white/50 text-center text-xs text-slate-500">
+          <footer className="py-4 border-t border-rule bg-paper text-center text-xs text-muted">
             <p>
               NyayaKram — Differentiated Case Flow Management Portal • District Judiciary Case Flow Management
             </p>
