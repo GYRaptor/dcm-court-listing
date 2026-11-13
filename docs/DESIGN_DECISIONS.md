@@ -118,3 +118,34 @@ Because Ministry of Law and Justice Problem Statement 147 defines the broad obje
 4. **Overdue Definition**: A case is flagged as **Overdue** if its current status is not `DISPOSED` and today's date exceeds `targetDisposalDate`.
 5. **Greedy Workload Allocation**: Unassigned new cases are automatically assigned to the judge with the lowest cumulative complexity across active (`PENDING` and `LISTED`) cases.
 
+---
+
+## 10. Institutional Interface & Design System (NyayaKram)
+Court management portals serve judicial officers, court clerks, and practicing advocates who interact with dense, consequential legal dockets. The interface intentionally abandons generic SaaS dashboard conventions (floating glass cards, saturated gradients, arbitrary emojis, and status filler) in favor of a restrained, paper-and-ink editorial system.
+
+### A. Typographic Hierarchy
+1. **Source Serif 4 (Judicial Headings)**:
+   - Used for page headers, card titles, and institutional branding (`NyayaKram`).
+   - Reflects the authority, solemnity, and typographical tradition of gazettes, law reports, and official registry documentation.
+2. **IBM Plex Sans (Body & Form Ergonomics)**:
+   - Engineered for clarity in dense administrative interfaces.
+   - Provides neutral legibility for case titles, party names, form labels, and operational buttons.
+3. **IBM Plex Mono (Tabular Numerals & Identifiers)**:
+   - Applied with `.tabular-nums` across all case numbers (`DCM/YYYY/XXXX`), priority scores, calendar dates, elapsed days, and audit timestamps.
+   - Fixed digit widths guarantee vertical alignment in numeric columns, enabling clerks and judges to scan and compare figures without visual jitter.
+
+### B. Paper & Ink Material Palette
+- **Paper Canvas (`#F6F3EC`)**: A calm, natural parchment base that eliminates harsh screen glare during long court sessions.
+- **Surface Elevation (`#FDFCF9`) & Hairline Rules (`#DAD5C8`)**: Replaces heavy drop shadows with crisp, 1px ruled lines reminiscent of ledger borders and judicial registers. Double rules (`.rule-double`) establish distinct institutional dividers.
+- **Deep Ink (`#1C2230`) & Muted (`#5C6470`)**: High-contrast, publication-grade typography adhering strictly to WCAG AA contrast standards.
+- **Restrained Signal Colors**:
+  - *Ink Navy (`#1F3A5F`)*: Primary institutional action buttons, active navigation markers, and track classification tiers.
+  - *Signal Oxblood (`#8A2E35`)*: Overdue matters and disposal actions.
+  - *Ochre (`#9A6B1F`)*: Pending reviews, cooling gap notices, and aging matters (>5 years).
+
+### C. Information Density & Human-Centered Registry Ergonomics
+- **Dense, Ruled Tables**: Tables use compact row heights (`py-2.5 px-3.5`) and hairline borders (`divide-y divide-rule`), allowing clerks to inspect dozens of cases without paging.
+- **Removal of Decorative Noise**: Stripped all emojis, decorative chips, "System Online" fillers, and welcome banners. All states are communicated through concise, professional terminology and quiet status indicators.
+- **Aggregated Courtroom Analytics**: Replaced disparate charts with single-row figure strips and aggregated horizontal workload bars, presenting clean complexity distribution per courtroom.
+
+
