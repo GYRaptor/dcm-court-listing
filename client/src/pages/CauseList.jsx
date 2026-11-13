@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import api from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import StatusBadge from "../components/StatusBadge.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 
 export default function CauseList() {
   const { user } = useAuth();
@@ -220,14 +222,12 @@ export default function CauseList() {
 
           {/* Table of cases */}
           {causeListData.hearings?.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 space-y-2">
-              <span className="text-3xl">⚖️</span>
-              <p className="font-semibold text-sm text-slate-700 mt-2">
-                No cases listed for this date.
-              </p>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-                No pending cases assigned to this courtroom have their statutory cooling gap elapsed on or before this date.
-              </p>
+            <div className="p-6">
+              <EmptyState
+                icon="⚖️"
+                title="No cases listed for this date"
+                description="No pending cases assigned to this courtroom have their statutory cooling gap elapsed on or before this date."
+              />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -247,12 +247,12 @@ export default function CauseList() {
                     const c = h.case;
                     const petitioners =
                       c?.parties
-                        ?.filter((p) => p.role === "PETITIONER")
+                          ?.filter((p) => p.role === "PETITIONER")
                         .map((p) => p.name)
                         .join(", ") || "N/A";
                     const respondents =
                       c?.parties
-                        ?.filter((p) => p.role === "RESPONDENT")
+                          ?.filter((p) => p.role === "RESPONDENT")
                         .map((p) => p.name)
                         .join(", ") || "N/A";
 
@@ -273,13 +273,7 @@ export default function CauseList() {
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span
-                            className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${getTrackBadge(
-                              c?.track?.name
-                            )}`}
-                          >
-                            {c?.track?.name}
-                          </span>
+                          <StatusBadge track={c?.track?.name} />
                         </td>
                         <td className="py-3.5 px-4">
                           <span
@@ -287,13 +281,11 @@ export default function CauseList() {
                               c?.priorityScore
                             )}`}
                           >
-                            {c?.priorityScore?.toFixed(1)} pts
+                            ⚡ {c?.priorityScore?.toFixed(1)} pts
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider font-mono bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                            {h.outcome}
-                          </span>
+                          <StatusBadge outcome={h.outcome} />
                         </td>
                       </tr>
                     );

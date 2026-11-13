@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api.js";
+import StatusBadge from "../components/StatusBadge.jsx";
 
 export default function MyHearings() {
   const { user } = useAuth();
@@ -159,14 +160,8 @@ export default function MyHearings() {
                       <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded tabular-nums">
                         {c?.caseNumber}
                       </span>
-                      <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${getTrackBadge(c?.track?.name)}`}>
-                        {c?.track?.name}
-                      </span>
-                      {c?.isUrgent && (
-                        <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
-                          Urgent
-                        </span>
-                      )}
+                      <StatusBadge track={c?.track?.name} />
+                      {c?.isUrgent && <StatusBadge urgency="Urgent" />}
                     </div>
                     <p className="font-medium text-slate-900 text-sm">{c?.title}</p>
                     <p className="text-xs text-slate-500">
@@ -205,21 +200,21 @@ export default function MyHearings() {
                     <button
                       disabled={isSubmitting}
                       onClick={() => recordOutcome(h.id, "HEARD")}
-                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
                     >
                       ✓ Mark HEARD
                     </button>
                     <button
                       disabled={isSubmitting}
                       onClick={() => recordOutcome(h.id, "ADJOURNED")}
-                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
                     >
                       ↻ ADJOURN
                     </button>
                     <button
                       disabled={isSubmitting}
                       onClick={() => recordOutcome(h.id, "DISPOSED")}
-                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
+                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm transition"
                     >
                       ✕ DISPOSE
                     </button>
@@ -266,9 +261,7 @@ export default function MyHearings() {
                         "{h.remarks}"
                       </span>
                     )}
-                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium font-mono uppercase ${getOutcomePill(h.outcome)}`}>
-                      {h.outcome}
-                    </span>
+                    <StatusBadge outcome={h.outcome} />
                   </div>
                 </div>
               );
