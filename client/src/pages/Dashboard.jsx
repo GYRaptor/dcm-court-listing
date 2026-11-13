@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api.js";
 import DashboardMetrics from "../components/DashboardMetrics.jsx";
+import SkeletonLoader from "../components/SkeletonLoader.jsx";
+import StatusBadge from "../components/StatusBadge.jsx";
 import {
   BarChart,
   Bar,
@@ -48,7 +50,7 @@ export default function Dashboard() {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200/80 text-xs space-y-1">
+        <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-md border border-slate-200/80 text-xs space-y-1">
           <p className="font-semibold text-slate-900">{label} Track</p>
           <p className="text-blue-700 font-medium">
             Average Age: <span className="font-mono tabular-nums font-bold">{data.averageAge}d</span>
@@ -59,6 +61,22 @@ export default function Dashboard() {
           <p className="text-slate-500">
             Active Cases: <span className="font-mono tabular-nums">{data.caseCount}</span>
           </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CustomWorkloadTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-md border border-slate-200/80 text-xs space-y-1">
+          <p className="font-semibold text-slate-900">{label}</p>
+          {payload.map((item, idx) => (
+            <p key={idx} style={{ color: item.color }} className="font-medium">
+              {item.name}: <span className="font-mono tabular-nums font-bold">{item.value}</span>
+            </p>
+          ))}
         </div>
       );
     }
@@ -137,8 +155,9 @@ export default function Dashboard() {
 
           <div className="h-64 w-full">
             {loading ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-400 animate-pulse">
-                Loading track chart...
+              <div className="h-full flex flex-col items-center justify-center gap-2 text-xs text-slate-400 bg-slate-50/50 rounded-lg border border-dashed border-slate-200 animate-pulse">
+                <span className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
+                <span>Loading statutory track distribution...</span>
               </div>
             ) : error ? (
               <div className="h-full flex items-center justify-center text-xs text-rose-500">
@@ -217,8 +236,9 @@ export default function Dashboard() {
 
           <div className="h-64 w-full">
             {loading ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-400 animate-pulse">
-                Loading workload chart...
+              <div className="h-full flex flex-col items-center justify-center gap-2 text-xs text-slate-400 bg-slate-50/50 rounded-lg border border-dashed border-slate-200 animate-pulse">
+                <span className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
+                <span>Loading courtroom workload metrics...</span>
               </div>
             ) : error ? (
               <div className="h-full flex items-center justify-center text-xs text-rose-500">
@@ -243,12 +263,7 @@ export default function Dashboard() {
                     tickLine={false}
                     className="tabular-nums"
                   />
-                  <Tooltip
-                    formatter={(value, name) => [
-                      value,
-                      name === "activeCases" ? "Active Cases" : "Complexity Score",
-                    ]}
-                  />
+                  <Tooltip content={<CustomWorkloadTooltip />} />
                   <Legend
                     wrapperStyle={{ fontSize: 11, paddingTop: 6 }}
                     iconType="circle"
@@ -315,13 +330,7 @@ export default function Dashboard() {
                 className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 transition-colors duration-150 hover:bg-slate-50/70 rounded px-1"
               >
                 <div className="flex items-center gap-2.5">
-                  <span
-                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-mono font-medium ring-1 ring-inset ${getActionBadgeClass(
-                      log.action
-                    )}`}
-                  >
-                    {log.action}
-                  </span>
+                  <StatusBadge status={log.action} />
                   <span className="font-semibold text-slate-800 font-mono tabular-nums">
                     {log.case?.caseNumber || "Registry Event"}
                   </span>

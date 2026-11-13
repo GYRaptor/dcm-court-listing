@@ -61,7 +61,7 @@ export default function DashboardMetrics() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* Total Pending Card */}
-        <div className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:border-slate-300 transition-colors duration-150">
+        <div className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-slate-300 transition-all duration-150">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Total Pending
@@ -82,7 +82,7 @@ export default function DashboardMetrics() {
         </div>
 
         {/* Overdue Cases Card */}
-        <div className="p-5 bg-white border border-rose-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:border-rose-300 transition-colors duration-150">
+        <div className="p-5 bg-white border border-rose-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-rose-300 transition-all duration-150">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-rose-700">
               Overdue Cases
@@ -105,7 +105,7 @@ export default function DashboardMetrics() {
         </div>
 
         {/* Average Age Card */}
-        <div className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:border-slate-300 transition-colors duration-150">
+        <div className="p-5 bg-white border border-slate-200/80 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-slate-300 transition-all duration-150">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Average Age
