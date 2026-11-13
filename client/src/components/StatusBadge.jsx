@@ -54,12 +54,28 @@ export default function StatusBadge({
     );
   }
 
-  // Hearing outcomes: plain text with muted or subtle indicator
+  // Hearing outcomes: plain text with subtle dot indicator
   if (isOutcome) {
     const outcomeText = label || resolvedValue;
+    let dotClass = "bg-muted";
+    let textClass = "text-muted";
+    if (resolvedValue === "SCHEDULED") {
+      dotClass = "bg-accent";
+      textClass = "text-accent font-medium";
+    } else if (resolvedValue === "HEARD") {
+      dotClass = "bg-[#3E6088]";
+      textClass = "text-ink";
+    } else if (resolvedValue === "ADJOURNED") {
+      dotClass = "bg-ochre";
+      textClass = "text-ochre";
+    } else if (resolvedValue === "DISPOSED") {
+      dotClass = "bg-rule";
+      textClass = "text-muted";
+    }
+
     return (
-      <span className={`inline-flex items-center gap-1.5 text-xs text-muted font-medium ${className}`}>
-        <span className="w-1.5 h-1.5 rounded-full bg-rule shrink-0"></span>
+      <span className={`inline-flex items-center gap-1.5 text-xs ${textClass} ${className}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dotClass} shrink-0`}></span>
         <span className="font-mono text-[11px] tracking-wide">{outcomeText}</span>
       </span>
     );
