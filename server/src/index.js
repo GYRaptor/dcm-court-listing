@@ -15,10 +15,27 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enable CORS so the React frontend (running on a different port) can make requests
+// Enable CORS so the React frontend can make requests from local or production Vercel origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        (process.env.CLIENT_URL && origin.startsWith(process.env.CLIENT_URL))
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
@@ -26,23 +43,32 @@ app.use(
 // Parse incoming JSON request bodies into req.body
 app.use(express.json());
 
-// Mount API routes
-app.use("/auth", authRoutes);
-app.use("/cases", caseRoutes);
-app.use("/judges", judgeRoutes);
-app.use("/cause-list", causeListRoutes);
-app.use("/dashboard", dashboardRoutes);
-app.use("/hearings", hearingRoutes);
-app.use("/audit-log", auditRoutes);
+// Mount API routes (supports both standard and /api-prefixed routes for production deployment)
+const routes = [
+  ["/auth", authRoutes],
+  ["/cases", caseRoutes],
+  ["/judges", judgeRoutes],
+  ["/cause-list", causeListRoutes],
+  ["/dashboard", dashboardRoutes],
+  ["/hearings", hearingRoutes],
+  ["/audit-log", auditRoutes],
+];
+
+for (const [path, router] of routes) {
+  app.use(path, router);
+  app.use(`/api${path}`, router);
+}
 
 // Health check endpoint for verifying server uptime and deployment status
-app.get("/health", (req, res) => {
+const healthCheckHandler = (req, res) => {
   res.status(200).json({
     status: "ok",
     message: "DCM Court Listing API is healthy",
     timestamp: new Date().toISOString(),
   });
-});
+};
+app.get("/health", healthCheckHandler);
+app.get("/api/health", healthCheckHandler);
 
 // 404 handler for unmatched routes
 app.use((req, res) => {
