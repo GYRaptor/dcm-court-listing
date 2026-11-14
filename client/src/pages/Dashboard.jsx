@@ -235,25 +235,25 @@ export default function Dashboard() {
                 to="/cases/new"
                 className="px-3.5 py-1.5 bg-accent hover:bg-accent-hover text-surface text-xs font-medium rounded-[4px] transition shadow-xs"
               >
-                + Register new matter
+                + Register case
               </Link>
               <Link
                 to="/cause-list"
                 className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Generate cause list
+                Cause list
               </Link>
               <Link
                 to="/lookup"
-                className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-mono rounded-[4px] transition"
+                className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Docket lookup
+                Case lookup
               </Link>
               <Link
                 to="/cases"
                 className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Master registry
+                Cases
               </Link>
             </>
           )}
@@ -270,25 +270,25 @@ export default function Dashboard() {
                 to="/cause-list"
                 className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Cause list generator
+                Cause list
               </Link>
               <Link
                 to="/audit-log"
                 className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Review audit logs
+                Audit log
               </Link>
               <Link
                 to="/lookup"
-                className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-mono rounded-[4px] transition"
+                className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Docket lookup
+                Case lookup
               </Link>
               <Link
                 to="/cases"
                 className="px-3 py-1.5 border border-rule hover:bg-paper/70 text-ink text-xs font-medium rounded-[4px] transition"
               >
-                Master registry
+                Cases
               </Link>
             </>
           )}
@@ -503,7 +503,7 @@ export default function Dashboard() {
           </div>
           <Link
             to="/cases?status=PENDING"
-            className="text-xs font-mono text-accent hover:underline self-start sm:self-auto"
+            className="text-xs font-medium text-accent hover:underline self-start sm:self-auto"
           >
             View all flagged cases &rarr;
           </Link>
@@ -518,7 +518,7 @@ export default function Dashboard() {
             <div className="p-6">
               <EmptyState
                 title="No critical attention matters"
-                description="All active cases are currently compliant within their statutory track targets and hearing gap rules."
+                description="All active cases are currently compliant within their track targets and hearing gap rules."
               />
             </div>
           ) : (
@@ -558,7 +558,7 @@ export default function Dashboard() {
                         <div className="font-medium text-ink truncate" title={c.title}>
                           {c.title}
                         </div>
-                        <div className="text-[11px] text-muted font-mono mt-0.5">
+                        <div className="text-[11px] text-muted font-sans mt-0.5">
                           {c.caseType}
                         </div>
                       </td>
@@ -588,9 +588,9 @@ export default function Dashboard() {
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <Link
                           to={`/cases/${c.id}`}
-                          className="font-mono text-xs text-accent hover:underline"
+                          className="text-xs text-accent hover:underline font-medium"
                         >
-                          Dossier &rarr;
+                          View case &rarr;
                         </Link>
                       </td>
                     </tr>
@@ -619,7 +619,7 @@ export default function Dashboard() {
             </span>
             <Link
               to="/cause-list"
-              className="text-xs font-mono text-accent hover:underline"
+              className="text-xs font-medium text-accent hover:underline"
             >
               Full cause list &rarr;
             </Link>
@@ -673,7 +673,7 @@ export default function Dashboard() {
                           {h.case.title}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-muted font-mono">{h.case.caseType}</span>
+                          <span className="text-[10px] text-muted font-sans">{h.case.caseType}</span>
                           <StatusBadge track={h.case.track} />
                         </div>
                       </td>
@@ -698,9 +698,9 @@ export default function Dashboard() {
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <Link
                           to={`/cases/${h.case.id}`}
-                          className="font-mono text-xs text-accent hover:underline"
+                          className="text-xs text-accent hover:underline font-medium"
                         >
-                          Dossier &rarr;
+                          View case &rarr;
                         </Link>
                       </td>
                     </tr>
@@ -730,7 +730,7 @@ export default function Dashboard() {
           {user?.role === "JUDGE" && (
             <Link
               to="/audit-log"
-              className="text-xs font-mono text-accent hover:underline"
+              className="text-xs font-medium text-accent hover:underline"
             >
               View full audit log &rarr;
             </Link>
@@ -764,7 +764,7 @@ export default function Dashboard() {
                       {log.case.caseNumber}
                     </Link>
                   ) : (
-                    <span className="font-semibold text-ink font-mono tabular-nums">
+                    <span className="font-semibold text-ink font-sans">
                       Registry Event
                     </span>
                   )}

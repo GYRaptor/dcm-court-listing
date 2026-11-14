@@ -87,7 +87,7 @@ export default function MyHearings() {
         <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 pb-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
-              Judicial bench cause list
+              Today's bench hearings
             </h1>
             <p className="text-xs sm:text-sm text-muted mt-1">
               Listing date: <span className="font-mono tabular-nums font-semibold text-ink">{date}</span>
@@ -98,7 +98,7 @@ export default function MyHearings() {
           </div>
           <button
             onClick={fetchHearings}
-            className="px-3 py-1 border border-rule text-ink hover:bg-paper text-xs font-mono rounded-[3px] transition self-start sm:self-auto"
+            className="px-3 py-1 border border-rule text-ink hover:bg-paper text-xs font-medium rounded-[3px] transition self-start sm:self-auto"
           >
             Refresh docket
           </button>
@@ -159,9 +159,9 @@ export default function MyHearings() {
                     <span>Adjournments: <strong className="text-ink">{c?.adjournmentCount}</strong></span>
                     <Link
                       to={`/cases/${c?.id}`}
-                      className="text-accent hover:underline text-xs mt-1"
+                      className="text-accent hover:underline text-xs font-medium mt-1"
                     >
-                      Dossier &rarr;
+                      View case &rarr;
                     </Link>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export default function MyHearings() {
                       onClick={() => recordOutcome(h.id, "DISPOSED")}
                       className="px-3 py-1.5 border border-oxblood/40 text-oxblood hover:bg-oxblood-light text-xs font-medium rounded-[3px] transition disabled:opacity-50"
                     >
-                      Dispose Matter
+                      Dispose Case
                     </button>
                   </div>
 
@@ -210,10 +210,10 @@ export default function MyHearings() {
                     <p className="text-xs text-oxblood">{errorMessages[h.id]}</p>
                   )}
                   {successMessages[h.id] && (
-                    <p className="text-xs text-accent font-medium font-mono">
+                    <p className="text-xs text-accent font-medium font-sans">
                       {successMessages[h.id]}
                       {nextDates[h.id] && (
-                        <> &bull; Earliest next listing: <span className="tabular-nums font-semibold">{nextDates[h.id]}</span></>
+                        <> &bull; Earliest next listing: <span className="font-mono tabular-nums font-semibold">{nextDates[h.id]}</span></>
                       )}
                     </p>
                   )}

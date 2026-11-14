@@ -70,7 +70,7 @@ export default function AuditLog() {
         <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 pb-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
-              Judicial event audit log
+              Audit log
             </h1>
             <p className="text-xs sm:text-sm text-muted mt-1">
               Chronological ledger of case intake, track modifications, listings, and hearing outcomes.
@@ -126,7 +126,7 @@ export default function AuditLog() {
                   <th className="py-3.5 px-4 w-44">Timestamp</th>
                   <th className="py-3.5 px-4 w-44">Action</th>
                   <th className="py-3.5 px-4 w-40">Initiator</th>
-                  <th className="py-3.5 px-4 w-44">Target Matter</th>
+                  <th className="py-3.5 px-4 w-44">Target Case</th>
                   <th className="py-3.5 px-4">Event Details</th>
                 </tr>
               </thead>
@@ -151,7 +151,7 @@ export default function AuditLog() {
                       <div className="font-medium text-ink">
                         {log.user?.name || "System"}
                       </div>
-                      <div className="text-[10px] text-muted font-mono uppercase tracking-wider">
+                      <div className="text-[10px] text-muted font-caps">
                         {log.user?.role}
                       </div>
                     </td>
@@ -164,7 +164,7 @@ export default function AuditLog() {
                           {log.case.caseNumber}
                         </Link>
                       ) : (
-                        <span className="text-muted font-mono text-xs">General / Bench</span>
+                        <span className="text-muted text-xs font-sans">General / Bench</span>
                       )}
                     </td>
                     <td className="py-3.5 px-4">

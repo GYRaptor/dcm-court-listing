@@ -197,7 +197,7 @@ export default function CauseList() {
             <div className="p-6">
               <EmptyState
                 title="No cases listed for this date"
-                description="No pending cases assigned to this courtroom have their statutory cooling gap elapsed on or before this date."
+                description="No pending cases assigned to this courtroom have their track cooling gap elapsed on or before this date."
               />
             </div>
           ) : (

@@ -38,7 +38,7 @@ export default function Navbar() {
             <span className="font-serif font-bold text-lg sm:text-xl tracking-tight text-ink leading-tight">
               NyayaKram
             </span>
-            <span className="font-mono text-[11px] text-muted tracking-wide">
+            <span className="text-[11px] text-muted tracking-wide font-sans">
               District court listing
             </span>
           </Link>
@@ -58,13 +58,13 @@ export default function Navbar() {
                     Cases
                   </NavLink>
                   <NavLink to="/cases/new" className={navLinkClass}>
-                    New case
+                    Register case
                   </NavLink>
                   <NavLink to="/cause-list" className={navLinkClass}>
-                    Cause lists
+                    Cause list
                   </NavLink>
                   <NavLink to="/lookup" className={navLinkClass}>
-                    Docket lookup
+                    Case lookup
                   </NavLink>
                 </>
               )}
@@ -79,16 +79,16 @@ export default function Navbar() {
                     Cases
                   </NavLink>
                   <NavLink to="/cause-list" className={navLinkClass}>
-                    Cause lists
+                    Cause list
                   </NavLink>
                   <NavLink to="/hearings" className={navLinkClass}>
                     Hearings
                   </NavLink>
                   <NavLink to="/audit-log" className={navLinkClass}>
-                    Audit logs
+                    Audit log
                   </NavLink>
                   <NavLink to="/lookup" className={navLinkClass}>
-                    Docket lookup
+                    Case lookup
                   </NavLink>
                 </>
               )}
@@ -97,7 +97,7 @@ export default function Navbar() {
               {user.role === "LAWYER" && (
                 <>
                   <NavLink to="/lookup" className={navLinkClass}>
-                    Public docket lookup
+                    Case lookup
                   </NavLink>
                 </>
               )}
@@ -109,7 +109,7 @@ export default function Navbar() {
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="text-xs font-mono text-accent hover:underline font-medium"
+                  className="text-xs text-accent hover:underline font-medium"
                 >
                   Sign out
                 </button>

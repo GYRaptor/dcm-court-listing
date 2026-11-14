@@ -66,10 +66,10 @@ export default function Cases() {
         <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 pb-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
-              Master case registry
+              Cases
             </h1>
             <p className="text-xs sm:text-sm text-muted mt-1">
-              Institutional docket sorted by statutory priority formula.
+              District court registry sorted by priority score.
             </p>
           </div>
           {user?.role === "CLERK" && (
@@ -77,7 +77,7 @@ export default function Cases() {
               to="/cases/new"
               className="inline-flex items-center px-3.5 py-1.5 bg-accent hover:bg-accent-hover text-surface text-xs font-medium rounded-[3px] transition self-start sm:self-auto"
             >
-              Register new matter
+              Register case
             </Link>
           )}
         </div>
@@ -164,7 +164,7 @@ export default function Cases() {
               setApprovedFilter("");
               setJudgeFilter("");
             }}
-            className="text-xs text-accent hover:underline font-mono self-end pb-1"
+            className="text-xs text-accent hover:underline font-medium self-end pb-1"
           >
             Reset filters
           </button>
@@ -242,7 +242,7 @@ export default function Cases() {
                           {c.title}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[11px] text-muted font-mono">{c.caseType}</span>
+                          <span className="text-[11px] text-muted font-sans">{c.caseType}</span>
                           {c.isOverdue && (
                             <span className="text-[10px] font-mono text-oxblood font-semibold">
                               [Overdue]
@@ -262,12 +262,12 @@ export default function Cases() {
 
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {c.trackApproved ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs text-ink font-mono">
+                          <span className="inline-flex items-center gap-1.5 text-xs text-ink font-sans">
                             <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
                             Approved
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs text-ochre font-mono">
+                          <span className="inline-flex items-center gap-1.5 text-xs text-ochre font-sans">
                             <span className="w-1.5 h-1.5 rounded-full bg-ochre"></span>
                             Awaiting review
                           </span>
@@ -292,9 +292,9 @@ export default function Cases() {
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <Link
                           to={`/cases/${c.id}`}
-                          className="font-mono text-xs text-accent hover:underline"
+                          className="text-xs text-accent hover:underline font-medium"
                         >
-                          Dossier &rarr;
+                          View case &rarr;
                         </Link>
                       </td>
                     </tr>

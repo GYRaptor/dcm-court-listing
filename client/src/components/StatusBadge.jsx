@@ -76,7 +76,7 @@ export default function StatusBadge({
     return (
       <span className={`inline-flex items-center gap-1.5 text-xs ${textClass} ${className}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${dotClass} shrink-0`}></span>
-        <span className="font-mono text-[11px] tracking-wide">{outcomeText}</span>
+        <span className="font-sans text-xs tracking-wide">{outcomeText}</span>
       </span>
     );
   }

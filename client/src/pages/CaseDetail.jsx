@@ -129,8 +129,8 @@ export default function CaseDetail() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Back Link */}
       <div>
-        <Link to="/cases" className="text-xs font-mono text-accent hover:underline">
-          &larr; Back to master registry
+        <Link to="/cases" className="text-xs font-medium text-accent hover:underline">
+          &larr; Back to cases
         </Link>
       </div>
 
@@ -159,7 +159,7 @@ export default function CaseDetail() {
               </span>
             </div>
             <h1 className="text-xl font-serif text-ink mt-2">{caseData.title}</h1>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted font-mono mt-1">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted font-sans mt-1">
               <span>Type: {caseData.caseType}</span>
               <span>&bull;</span>
               <span>
@@ -182,19 +182,19 @@ export default function CaseDetail() {
           </div>
           <div className="p-2">
             <span className="font-caps text-[11px] text-muted block mb-0.5">Active Track</span>
-            <span className="font-mono font-bold text-accent text-sm sm:text-base tabular-nums">
-              {caseData.track?.name} ({caseData.track?.targetDays}d)
+            <span className="font-sans font-bold text-accent text-sm sm:text-base">
+              {caseData.track?.name} <span className="font-mono tabular-nums font-normal text-muted">({caseData.track?.targetDays}d)</span>
             </span>
           </div>
           <div className="p-2">
             <span className="font-caps text-[11px] text-muted block mb-0.5">Recommended</span>
-            <span className="font-mono font-semibold text-ink text-sm sm:text-base">
+            <span className="font-sans font-semibold text-ink text-sm sm:text-base">
               {caseData.suggestedTrack?.name}
             </span>
           </div>
           <div className="p-2">
             <span className="font-caps text-[11px] text-muted block mb-0.5">Expert Evidence</span>
-            <span className="font-mono font-semibold text-ink text-sm sm:text-base">
+            <span className="font-sans font-semibold text-ink text-sm sm:text-base">
               {caseData.hasExpertEvidence ? "Yes" : "No"}
             </span>
           </div>
@@ -229,12 +229,12 @@ export default function CaseDetail() {
           </div>
           <div>
             {caseData.trackApproved ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-ink font-mono">
+              <span className="inline-flex items-center gap-1.5 text-xs text-ink font-sans">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
                 Approved by {caseData.trackApprovedBy?.name || "Bench"}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs text-ochre font-mono">
+              <span className="inline-flex items-center gap-1.5 text-xs text-ochre font-sans">
                 <span className="w-1.5 h-1.5 rounded-full bg-ochre"></span>
                 Awaiting judicial review
               </span>
@@ -344,7 +344,7 @@ export default function CaseDetail() {
           {caseData.parties?.map((p) => (
             <div key={p.id} className="py-2.5 flex items-center justify-between">
               <span className="font-medium text-ink">{p.name}</span>
-              <span className="font-mono text-[10px] text-muted uppercase">
+              <span className="font-caps text-[10px] text-muted">
                 {p.role}
               </span>
             </div>
@@ -387,10 +387,10 @@ export default function CaseDetail() {
           </div>
         )}
         {caseData.status === "PENDING" && caseData.earliestNextDate && (
-          <div className="mt-2 p-3 bg-paper border border-rule rounded-[3px] text-xs text-ink font-mono">
+          <div className="mt-2 p-3 bg-paper border border-rule rounded-[3px] text-xs text-ink font-sans">
             <span>Earliest next listing: </span>
-            <span className="tabular-nums font-semibold text-accent">{caseData.earliestNextDate}</span>
-            <span className="text-muted ml-2">(cooling gap enforced)</span>
+            <span className="font-mono tabular-nums font-semibold text-accent">{caseData.earliestNextDate}</span>
+            <span className="text-muted ml-2 font-sans">(cooling gap enforced)</span>
           </div>
         )}
       </section>

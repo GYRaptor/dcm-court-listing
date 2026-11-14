@@ -126,7 +126,7 @@ export default function NewCase() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         <div className="bg-surface border border-rule rounded-[4px] p-8 text-center space-y-6">
           <div className="space-y-1">
-            <h2 className="text-2xl font-serif text-ink">Matter successfully registered</h2>
+            <h2 className="text-2xl font-serif text-ink">Case successfully registered</h2>
             <p className="text-xs text-muted">
               Institutional tracking identifier generated and added to judicial master registry.
             </p>
@@ -141,8 +141,8 @@ export default function NewCase() {
             </div>
             <div className="flex justify-between items-center border-b border-rule pb-2">
               <span className="font-caps text-[11px] text-muted">Suggested Track</span>
-              <span className="font-mono text-xs font-semibold text-ink">
-                {registeredCase.suggestedTrack?.name} ({registeredCase.suggestedTrack?.targetDays}d target)
+              <span className="font-sans text-xs font-semibold text-ink">
+                {registeredCase.suggestedTrack?.name} <span className="font-mono tabular-nums font-normal text-muted">({registeredCase.suggestedTrack?.targetDays}d target)</span>
               </span>
             </div>
             <div className="flex justify-between items-center border-b border-rule pb-2">
@@ -157,7 +157,7 @@ export default function NewCase() {
             </div>
             <div className="flex justify-between items-center">
               <span className="font-caps text-[11px] text-muted">Judicial Review</span>
-              <span className="font-mono text-xs text-ochre">
+              <span className="font-sans text-xs text-ochre">
                 Awaiting judicial review
               </span>
             </div>
@@ -168,13 +168,13 @@ export default function NewCase() {
               to={`/cases/${registeredCase.id}`}
               className="px-4 py-2 bg-accent hover:bg-accent-hover text-surface rounded-[3px] text-xs font-medium transition"
             >
-              Inspect case dossier &rarr;
+              View case &rarr;
             </Link>
             <button
               onClick={resetForm}
               className="px-4 py-2 border border-rule text-ink hover:bg-paper rounded-[3px] text-xs font-medium transition"
             >
-              Register another matter
+              Register another case
             </button>
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function NewCase() {
         <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 pb-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
-              Register new court matter
+              Register case
             </h1>
             <p className="text-xs sm:text-sm text-muted mt-1">
               Clerk intake form with real-time algorithmic DCFM track classification.
@@ -208,11 +208,11 @@ export default function NewCase() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Main Details Card */}
         <section
-          aria-label="Matter particulars"
+          aria-label="Case particulars"
           className="bg-surface border border-rule rounded-[4px] p-6 space-y-4"
         >
           <h2 className="font-caps text-[11px] text-muted">
-            1. Matter Particulars
+            1. Case Particulars
           </h2>
 
           <div>
@@ -270,7 +270,7 @@ export default function NewCase() {
                 onChange={(e) => setIsUrgent(e.target.checked)}
                 className="h-3.5 w-3.5 text-accent border-rule rounded focus:ring-accent"
               />
-              <span>Mark as urgent matter (+30 priority points upon scheduling)</span>
+              <span>Mark as urgent case (+30 priority points upon scheduling)</span>
             </label>
 
             <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-ink font-sans">
@@ -297,7 +297,7 @@ export default function NewCase() {
             <button
               type="button"
               onClick={addPartyRow}
-              className="text-xs font-mono text-accent hover:underline"
+              className="text-xs font-medium text-accent hover:underline"
             >
               + Add party row
             </button>
@@ -327,7 +327,7 @@ export default function NewCase() {
                   type="button"
                   disabled={parties.length <= 2}
                   onClick={() => removePartyRow(idx)}
-                  className="text-xs px-2 py-1 text-muted hover:text-oxblood disabled:opacity-30 transition font-mono"
+                  className="text-xs px-2 py-1 text-muted hover:text-oxblood disabled:opacity-30 transition font-sans"
                   title="Remove party"
                 >
                   Remove
@@ -357,7 +357,7 @@ export default function NewCase() {
                   Complexity: {liveAnalysis.complexity} pts
                 </span>
                 <span className="text-muted">&bull;</span>
-                <span className="font-semibold text-accent font-mono">
+                <span className="font-semibold text-accent font-sans">
                   Suggested Track: {liveAnalysis.track}
                 </span>
               </div>
@@ -370,7 +370,7 @@ export default function NewCase() {
               disabled={loading}
               className="px-4 py-2 bg-accent hover:bg-accent-hover text-surface text-xs font-medium rounded-[3px] transition disabled:opacity-50 self-start sm:self-auto"
             >
-              {loading ? "Registering..." : "Confirm & register matter"}
+              {loading ? "Registering..." : "Confirm & register case"}
             </button>
           </div>
         </section>

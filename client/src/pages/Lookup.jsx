@@ -34,7 +34,7 @@ export default function Lookup() {
       {/* Editorial Page Header */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl sm:text-3xl font-serif text-ink tracking-tight">
-          Public case docket lookup
+          Public case lookup
         </h1>
         <p className="text-xs sm:text-sm text-muted max-w-lg mx-auto leading-relaxed">
           Inspect listing status, assigned DCFM track, and scheduled hearing proceedings by case number.
@@ -57,7 +57,7 @@ export default function Lookup() {
           disabled={loading}
           className="px-4 py-2 bg-accent hover:bg-accent-hover text-surface font-medium text-xs sm:text-sm rounded-[3px] transition disabled:opacity-50"
         >
-          {loading ? "Searching..." : "Search docket"}
+          {loading ? "Searching..." : "Search case"}
         </button>
       </form>
 
@@ -100,7 +100,7 @@ export default function Lookup() {
                 )}
               </div>
               <h2 className="text-base font-serif font-semibold text-ink mt-1.5">{caseData.title}</h2>
-              <p className="text-xs text-muted font-mono mt-0.5">Matter Type: {caseData.caseType}</p>
+              <p className="text-xs text-muted mt-0.5 font-sans">Case type: <span className="font-medium text-ink">{caseData.caseType}</span></p>
             </div>
             <div className="sm:text-right shrink-0">
               <span className="font-caps text-[11px] text-muted block mb-1">
@@ -152,7 +152,7 @@ export default function Lookup() {
                   className="flex items-center justify-between p-2.5 rounded-[3px] border border-rule bg-paper/50"
                 >
                   <span className="font-medium text-ink truncate mr-2">{p.name}</span>
-                  <span className="font-mono text-[10px] text-muted uppercase">
+                  <span className="font-caps text-[10px] text-muted">
                     {p.role}
                   </span>
                 </div>
@@ -167,7 +167,7 @@ export default function Lookup() {
             </h3>
             {!caseData.hearings || caseData.hearings.length === 0 ? (
               <p className="text-xs text-muted italic">
-                No past hearings on record. Matter will be listed according to statutory priority score.
+                No past hearings on record. Case will be listed according to priority score.
               </p>
             ) : (
               <div className="border border-rule rounded-[3px] divide-y divide-rule overflow-hidden">
@@ -189,8 +189,8 @@ export default function Lookup() {
       {/* Initial Empty State Helper */}
       {!searched && !loading && (
         <div className="p-6 text-center text-muted border border-rule rounded-[4px] bg-surface">
-          <p className="text-xs font-mono">
-            Enter an institutional identifier (e.g. <strong className="text-ink">DCM/2026/0001</strong>) to retrieve verified proceedings.
+          <p className="text-xs text-muted font-sans">
+            Enter an institutional identifier (e.g. <strong className="text-ink font-mono tabular-nums">DCM/2026/0001</strong>) to retrieve verified proceedings.
           </p>
         </div>
       )}
