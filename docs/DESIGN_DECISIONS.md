@@ -19,7 +19,7 @@ The DCFM architecture categorizes all incoming matters into three distinct track
   - *Adjournment Cooling Gap*: 21 days minimum between consecutive hearings.
   - *Case Types*: Rent disputes, civil suits, standard contract disagreements.
 - **COMPLEX Track**:
-  - *Target Disposal*: 730 calendar days (2 years — the maximum statutory upper bound).
+  - *Target Disposal*: 730 calendar days (2 years — model rule upper bound benchmark).
   - *Adjournment Cooling Gap*: 45 days minimum between consecutive hearings.
   - *Case Types*: Commercial disputes, complex property title suits, multi-party actions requiring extensive expert testimony.
 
@@ -54,7 +54,7 @@ Technology must assist judicial discretion, not replace it. Algorithms cannot fo
 - **Judicial Approval**: Only a Judicial Officer (`JUDGE`) has authority to:
   1. **Approve Track**: Marks `trackApproved = true` and records `trackApprovedById`.
   2. **Override Track**: Reclassifies the case to a different track (e.g., from STANDARD to FAST or COMPLEX). Overriding strictly requires a documented rationale (`trackOverrideReason`). Upon override, `targetDisposalDate` is recomputed based on the new track's `targetDays`, priority score is refreshed, and `trackApproved` becomes `true`.
-- **Auditability**: Every approval and override event writes an immutable entry into the `AuditLog` table.
+- **Auditability**: Every approval and override event writes an append-only transaction entry into the `AuditLog` table.
 
 ---
 
@@ -84,14 +84,14 @@ $$\text{Workload}(J) = \sum_{c \in \text{Cases}(J), \ \text{status} \in \{\text{
 ---
 
 ## 6. Audit Logging Architecture
-Court management software demands strict compliance and evidentiary auditability. The `AuditLog` model captures:
+Court management software demands strict compliance and evidentiary auditability. The `AuditLog` model operates as an append-only application transaction ledger:
 - `userId`: Identity of the clerk or judge initiating the action.
 - `action`: Specific standardized events (`CASE_REGISTERED`, `TRACK_APPROVED`, `TRACK_OVERRIDDEN`, `HEARING_SCHEDULED`, `OUTCOME_RECORDED`).
 - `caseId`: Associated case identifier (retained with `ON DELETE SET NULL` if a case record is ever expunged).
 - `details`: JSON text containing before/after states, override reasons, or listing parameters.
 - `createdAt`: ISO timestamp.
 
-Judges have exclusive access to review the registry audit trail (`GET /audit-log`).
+Audit rows are created solely via transactional application writes; no update or deletion endpoints exist in the API layer. Judges have access to review the registry audit trail (`GET /audit-log`).
 
 ---
 
@@ -110,13 +110,14 @@ Advocates and litigants need real-time visibility into their case progress, trac
 
 ---
 
-## 9. Project Assumptions
+## 9. Project Assumptions & Scope Boundaries
 Because Ministry of Law and Justice Problem Statement 147 defines the broad objective without prescribing micro-level administrative parameters, the following explicit assumptions are established:
-1. **Configurable Track Parameters**: Target disposal days (90, 365, 730) and gap days (7, 21, 45) are configured in the `Track` database table, allowing judicial administrative committees to adjust policies without code changes.
-2. **Two-Year Ceiling**: All tracks are bounded by the statutory 730-day upper limit.
-3. **Aging Definition**: A case is flagged as **Aging** if it remains undisposed after 5 years from its filing date. This is an informational registry flag and does not create a fourth track.
-4. **Overdue Definition**: A case is flagged as **Overdue** if its current status is not `DISPOSED` and today's date exceeds `targetDisposalDate`.
+1. **Configurable Model Rules**: Target disposal days (90, 365, 730) and gap days (7, 21, 45) represent configurable administrative heuristics inspired by Model Case Flow Management Rules rather than inflexible statutory provisions of the CPC or BNSS/CrPC. They are stored in the `Track` database table, allowing judicial committees to adjust policies without code changes.
+2. **Two-Year Upper Bound Benchmark**: COMPLEX track disposal targets are bounded by the 730-day recommended upper limit.
+3. **Aging Flag**: A case is flagged as **Aging** if it remains undisposed after 5 years from its filing date. This is an informational registry flag and does not create a fourth track.
+4. **Overdue Flag**: A case is flagged as **Overdue** if its current status is not `DISPOSED` and today's date exceeds `targetDisposalDate`.
 5. **Greedy Workload Allocation**: Unassigned new cases are automatically assigned to the judge with the lowest cumulative complexity across active (`PENDING` and `LISTED`) cases.
+6. **Jurisdiction & Audit Scope**: Designed for single district court registry operations with an application-level append-only audit trail (not blockchain or hardware-enforced WORM).
 
 ---
 

@@ -10,13 +10,13 @@
 In traditional Indian district court registries, cases are predominantly listed on a First-In-First-Out (FIFO) basis by filing date. This practice creates severe systemic gridlock:
 - **Procedural Obstruction**: High-turnaround matters (such as urgent bail petitions or Section 138 cheque bounce proceedings) get trapped behind voluminous, multi-party land title disputes.
 - **Unpredictable Cause Lists**: Court dockets regularly exceed judicial daily hearing capacities, forcing repeated adjournments, wasting advocate preparation time, and inflating pendency.
-- **Absence of Differentiated Disposal Benchmarks**: Matters lack statutory target timelines or mandatory cooling-off intervals between hearings.
+- **Absence of Differentiated Disposal Benchmarks**: Matters lack differentiated disposal benchmarks or procedural cooling-off intervals between hearings.
 
-The **NyayaKram (DCFM) Platform** operationalizes the Supreme Court of India's *Model Case Flow Management Rules* by categorizing cases into objective tracks (**FAST**, **STANDARD**, **COMPLEX**), enforcing statutory cooling periods, balancing judge workloads based on cumulative complexity, and generating capacity-capped, priority-sorted daily cause lists.
+The **NyayaKram (DCFM) Platform** operationalizes principles from the Supreme Court of India's *Model Case Flow Management Rules* by categorizing cases into objective tracks (**FAST**, **STANDARD**, **COMPLEX**), enforcing procedural cooling periods, balancing judge workloads based on cumulative complexity, and generating capacity-capped, priority-sorted daily cause lists.
 
 ### Judicial Roles & Access Control
 - **`CLERK` (Registry Officer)**: Intake and registration of cases, computation of initial complexity, litigant party entry, and institutional docket inspection.
-- **`JUDGE` (Presiding Judicial Officer)**: Human-in-the-loop review (approve or override suggested track with mandatory justification), generation of daily courtroom cause lists, recording of proceeding decrees (`HEARD`, `ADJOURNED`, `DISPOSED`), and inspection of the immutable registry audit log.
+- **`JUDGE` (Presiding Judicial Officer)**: Human-in-the-loop review (approve or override suggested track with mandatory justification), generation of daily courtroom cause lists, recording of proceeding decrees (`HEARD`, `ADJOURNED`, `DISPOSED`), and inspection of the append-only registry audit log.
 - **`LAWYER` / Public Advocate**: Public docket lookup by institutional case number (`DCM/YYYY/XXXX`), real-time tracking of assigned tracks, next eligible hearing dates, and published proceedings history without access to administrative controls.
 
 ---
@@ -25,9 +25,9 @@ The **NyayaKram (DCFM) Platform** operationalizes the Supreme Court of India's *
 
 | Tier | Technologies | Purpose |
 | :--- | :--- | :--- |
-| **Frontend Client** | React 18, Vite, Tailwind CSS, Recharts | Responsive civic/legal-tech interface, data visualization, tabular data alignment, and accessible status indicators. |
-| **Backend API** | Node.js (ES Modules), Express.js, Zod, bcrypt, jsonwebtoken | REST endpoints, JWT authentication, role-based access control (RBAC), and pure business logic services. |
-| **ORM & Database** | Prisma ORM v6, PostgreSQL (Neon Serverless) | Type-safe queries, migration management, and strict calendar storage with native `@db.Date`. |
+| **Frontend Client** | React 18.3, Vite 6.2, Tailwind CSS 4, Recharts 2.15 | Responsive civic/legal-tech interface, data visualization, tabular data alignment, and accessible status indicators. |
+| **Backend API** | Node.js (ES Modules), Express 4.21, Zod 3.24, bcrypt 5.1, jsonwebtoken 9.0 | REST endpoints, JWT authentication, role-based access control (RBAC), and pure business logic services. |
+| **ORM & Database** | Prisma ORM v6.5, PostgreSQL (Neon Serverless) | Type-safe queries, migration management, and strict calendar storage with native `@db.Date`. |
 | **Deployment** | Vercel (Client) + Render (Server) | Zero-maintenance serverless web hosting with dynamic CORS handling and automated migration on deployment. |
 
 ### System Architecture Workflow
@@ -173,7 +173,7 @@ erDiagram
 
 #### 3. Third Normal Form (3NF) Compliance
 - **Elimination of Transitive Dependencies**: Non-prime attributes depend solely on the primary key, never transitively through other non-prime attributes:
-  - `targetDays` and `gapDays` are determined exclusively by the track classification. Instead of repeating `targetDays` and `gapDays` on every `Case` row (which would create update anomalies if track statutory rules change), they reside exclusively in the `Track` entity (`trackId` $\rightarrow$ `Track`).
+  - `targetDays` and `gapDays` are determined exclusively by the track classification. Instead of repeating `targetDays` and `gapDays` on every `Case` row (which would create update anomalies if track guidelines or administrative policies change), they reside exclusively in the `Track` entity (`trackId` $\rightarrow$ `Track`).
   - Judicial metadata (`courtroom`, `dailyCapacity`) is isolated within the `Judge` table rather than duplicated across `User` or `Case` records.
   - If a judge changes courtroom, only a single record in `judges` updates, avoiding systemic update and deletion anomalies.
 
@@ -193,14 +193,14 @@ In standard 3NF, `priorityScore` and `adjournmentCount` could theoretically be c
 
 ## Core Judicial Algorithms
 
-### 1. Differentiated Tracks & Statutory Cooling Gaps
-Every case is mapped to a statutory track with an enforceable cooling gap between consecutive hearings:
+### 1. Differentiated Tracks & Procedural Cooling Gaps
+Every case is mapped to a track with an enforceable cooling gap between consecutive hearings. While inspired by model case flow management guidelines and Law Commission recommendations, track parameters are stored in the database and fully configurable:
 
 | Track | Target Disposal | Mandatory Cooling Gap | Typical Matters |
 | :--- | :--- | :--- | :--- |
 | **FAST** | **90 calendar days** | **7 days** minimum gap | Bail petitions, Section 138 NI Act (cheque bounce), summary rent disputes |
 | **STANDARD** | **365 calendar days** (1 year) | **21 days** minimum gap | Standard civil suits, contract breaches, contested rent matters |
-| **COMPLEX** | **730 calendar days** (2 years max) | **45 days** minimum gap | Commercial disputes, land title partition suits, multi-expert actions |
+| **COMPLEX** | **730 calendar days** (2 years benchmark) | **45 days** minimum gap | Commercial disputes, land title partition suits, multi-expert actions |
 
 ### 2. Algorithmic Complexity Scoring
 Track classification begins with an objective algorithmic complexity computation:
@@ -417,6 +417,31 @@ dcm-court-listing/
 │   └── VIVA_NOTES.md           # Comprehensive examination defense guide
 └── README.md                   # Master institutional documentation
 ```
+
+---
+
+## Assumptions & System Limitations
+
+To maintain academic rigor and transparent evaluation under Ministry of Law and Justice Problem Statement #147, the following engineering assumptions and scope boundaries are explicitly documented:
+
+1. **Configurable Model Rules vs. Codified Statutes**:
+   - The three disposal targets (FAST: 90 days, STANDARD: 365 days, COMPLEX: 730 days), mandatory cooling gaps (7, 21, and 45 days), and complexity base weights (1–7) are inspired by the *Model Case Flow Management Rules (2003)* recommended by the Supreme Court of India and Law Commission Report No. 230.
+   - They represent configurable administrative policies persisted in the `Track` database table, not rigid statutory mandates of the Code of Civil Procedure (CPC) or the Bharatiya Nagarik Suraksha Sanhita (BNSS/CrPC). Registry committees can adjust these thresholds without altering backend logic.
+
+2. **Jurisdictional & Deployment Scope**:
+   - The prototype models an Indian District & Sessions Court registry with shared judicial benches (e.g., Courtrooms 101, 102).
+   - It is designed as an operational district-level listing engine, not a multi-tenant national appellate hierarchy (High Courts or Supreme Court).
+
+3. **Append-Only Application Audit Trail**:
+   - Audit logging operates as an append-only transaction ledger recorded in the PostgreSQL `AuditLog` table.
+   - While application routes restrict modification and deletion, it is an application-level append-only log rather than a cryptographic blockchain or hardware WORM (Write Once, Read Many) storage.
+
+4. **Calendar & Holiday Computation**:
+   - Date calculations utilize continuous calendar days in Asia/Kolkata (IST) time (`server/src/utils/dates.js`).
+   - The scheduling engine accounts for days between hearings and target durations, but does not currently query local state gazetted holidays or judicial vacation schedules dynamically unless dates are manually scheduled around them.
+
+5. **Adjournment Ceiling**:
+   - To safeguard court dockets from starvation, the $+5$ priority increment per adjournment is strictly capped at $25$ points ($5 \times 5$ adjournments). Chronic legacy cases are prevented from monopolizing the daily list over newly filed urgent matters.
 
 ---
 
